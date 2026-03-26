@@ -1,0 +1,243 @@
+[
+    {
+        "id": "ms_tab_1",
+        "type": "tab",
+        "label": "Motion Sensor-Flow",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "ms_mqtt_in_1",
+        "type": "mqtt in",
+        "z": "ms_tab_1",
+        "name": "(Attribute)Motion-Sensor",
+        "topic": "v1/devices/me/attributes",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "ms_broker_1",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 160,
+        "y": 120,
+        "wires": [
+            [
+                "ms_debug_1",
+                "ms_limit_1"
+            ]
+        ]
+    },
+    {
+        "id": "ms_debug_1",
+        "type": "debug",
+        "z": "ms_tab_1",
+        "name": "debug Motion-Sensor 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 400,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "ms_debug_2",
+        "type": "debug",
+        "z": "ms_tab_1",
+        "name": "debug Motion-Sensor 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 760,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "ms_limit_1",
+        "type": "function",
+        "z": "ms_tab_1",
+        "name": "dataIntravelLimit",
+        "func": "let out ={};\nif (msg.payload.dataIntravel < 10) \n{ msg.payload.dataIntravel = 10}\n\nout.delay = (msg.payload.dataIntravel)*1000\n\nreturn out;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 120,
+        "wires": [
+            [
+                "ms_controller_1"
+            ]
+        ]
+    },
+    {
+        "id": "ms_controller_1",
+        "type": "trigger",
+        "z": "ms_tab_1",
+        "name": "dataIntravelContoller",
+        "op1": "1",
+        "op2": "0",
+        "op1type": "str",
+        "op2type": "str",
+        "duration": "-250",
+        "extend": false,
+        "overrideDelay": true,
+        "units": "s",
+        "reset": "",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 420,
+        "y": 200,
+        "wires": [
+            [
+                "ms_metrics_1",
+                "ms_battery_1"
+            ]
+        ]
+    },
+    {
+        "id": "ms_metrics_1",
+        "type": "function",
+        "z": "ms_tab_1",
+        "name": "MotionSensorMetrics",
+        "func": "// Helper function to generate random integer in a range\nfunction randomInt(min, max) {\n    return Math.floor(Math.random() * (max - min + 1)) + min;\n}\n\n// Build telemetry for this device\nlet out = {\n    motion_detected_numeric: Math.random() > 0.8 ? 1 : 0,\n    light_level_lux_numeric: randomInt(10, 800),\n    temperature_numeric: randomInt(18, 30),\n    humidity_percent_numeric: randomInt(30, 70)\n};\n\n// Add formatted string values\nout.motion_detected = out.motion_detected_numeric === 1 ? \"Detected\" : \"Clear\";\nout.light_level_lux = out.light_level_lux_numeric + \" lux\";\nout.temperature = out.temperature_numeric + \" °C\";\nout.humidity_percent = out.humidity_percent_numeric + \" %\";\n\n// Set the new output in msg.payload\nmsg.payload = out;\n\n// Return updated message\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 320,
+        "wires": [
+            [
+                "ms_debug_2",
+                "ms_telemetry_out_1"
+            ]
+        ]
+    },
+    {
+        "id": "ms_restart_1",
+        "type": "inject",
+        "z": "ms_tab_1",
+        "name": "Restart Device",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "3",
+        "topic": "",
+        "payload": "{\"dataIntravel\":30}",
+        "payloadType": "json",
+        "x": 120,
+        "y": 60,
+        "wires": [
+            [
+                "ms_limit_1"
+            ]
+        ]
+    },
+    {
+        "id": "ms_telemetry_out_1",
+        "type": "mqtt out",
+        "z": "ms_tab_1",
+        "name": "(Telemetry)Motion-Sensor",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "ms_broker_1",
+        "x": 810,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "ms_battery_1",
+        "type": "function",
+        "z": "ms_tab_1",
+        "name": "BatteryMetrics",
+        "func": "// Helper function to generate random number in a range\nfunction randomInt(min, max) {\n    return Math.floor(Math.random() * (max - min + 1)) + min;\n}\n\n// Get or initialize battery state \nlet batteryLevel = flow.get('batteryLevel') || randomInt(50, 100); \nlet isCharging = flow.get('isCharging') || false;\n\n// Simulate battery cycle\nif (isCharging) {\n    batteryLevel += randomInt(1, 3);\n    if (batteryLevel >= 100) {\n        batteryLevel = 100;\n        isCharging = false;\n    }\n} else {\n    batteryLevel -= randomInt(1, 2);\n    if (batteryLevel <= 15) {\n        isCharging = true;\n    }\n}\n\n// Determine battery status\nlet batteryStatus = \"Normal\";\nif (batteryLevel <= 20) {\n    batteryStatus = \"Low\";\n} else if (batteryLevel >= 95 && isCharging) {\n    batteryStatus = \"Full\";\n}\n\n// Save state for next run\nflow.set('batteryLevel', batteryLevel);\nflow.set('isCharging', isCharging);\n\n// Build attribute payload\nmsg.payload = {\n    batteryLevel: batteryLevel,\n    batteryStatus: batteryStatus,\n    batteryChargingStatus: isCharging ? \"Charging\" : \"Not Charging\"\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 420,
+        "wires": [
+            [
+                "ms_attributes_out_1"
+            ]
+        ]
+    },
+    {
+        "id": "ms_attributes_out_1",
+        "type": "mqtt out",
+        "z": "ms_tab_1",
+        "name": "(Attributes)Motion-Sensor",
+        "topic": "v1/devices/me/attributes",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "ms_broker_1",
+        "x": 910,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "ms_broker_1",
+        "type": "mqtt-broker",
+        "name": "Motion-Sensor-Broker",
+        "broker": "mqtt-tb-sit.piltismart.org",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]

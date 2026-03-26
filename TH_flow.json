@@ -1,0 +1,275 @@
+[
+    {
+        "id": "th_tab_01",
+        "type": "tab",
+        "label": "PiltiSmart-TH-Probe",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "th_mqtt_in_01",
+        "type": "mqtt in",
+        "z": "th_tab_01",
+        "name": "(Attributes)PiltiSmart-TH-Probe",
+        "topic": "v1/devices/me/attributes",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "th_broker_01",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 180,
+        "y": 120,
+        "wires": [
+            [
+                "th_limit_01"
+            ]
+        ]
+    },
+    {
+        "id": "th_limit_01",
+        "type": "function",
+        "z": "th_tab_01",
+        "name": "dataIntravelLimit",
+        "func": "let out ={}\nif (msg.payload.dataIntravel < 10) \n{ msg.payload.dataIntravel = 10}\n\nout.delay = (msg.payload.dataIntravel)*1000\n\nreturn out;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 490,
+        "y": 120,
+        "wires": [
+            [
+                "th_controller_01"
+            ]
+        ]
+    },
+    {
+        "id": "th_controller_01",
+        "type": "trigger",
+        "z": "th_tab_01",
+        "name": "dataIntravelContoller",
+        "op1": "1",
+        "op2": "0",
+        "op1type": "str",
+        "op2type": "str",
+        "duration": "-250",
+        "extend": false,
+        "overrideDelay": true,
+        "units": "s",
+        "reset": "",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 160,
+        "y": 200,
+        "wires": [
+            [
+                "th_battery_01",
+                "th_get_ip_01",
+                "th_get_data_01"
+            ]
+        ]
+    },
+    {
+        "id": "th_restart_01",
+        "type": "inject",
+        "z": "th_tab_01",
+        "name": "Restart Device",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "3",
+        "topic": "",
+        "payload": "{\"dataIntravel\":30}",
+        "payloadType": "json",
+        "x": 180,
+        "y": 60,
+        "wires": [
+            [
+                "th_limit_01"
+            ]
+        ]
+    },
+    {
+        "id": "th_get_data_01",
+        "type": "http request",
+        "z": "th_tab_01",
+        "name": "Get TH Data",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "https://api.openweathermap.org/data/2.5/weather?lat=9.939093&lon=78.121719&appid=a2f587cab8f72610e9e3bc4f3bbaa905&units=metric",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 390,
+        "y": 260,
+        "wires": [
+            [
+                "th_func_01"
+            ]
+        ]
+    },
+    {
+        "id": "th_func_01",
+        "type": "function",
+        "z": "th_tab_01",
+        "name": "TH",
+        "func": "let payload = msg.payload;  // Extract the payload from the message\n\n// Create a new object to store the extracted values\nlet out = {};\n\n// Check if the required fields are present\nif (payload.main) {\n    out[\"temperature(Celsius)\"] = payload.main.temp;  // Extract the temperature\n    out.humidity = payload.main.humidity;  // Extract the humidity\n}\n\n// Set the new output in msg.payload\nmsg.payload = out;\n\n// Return the updated message object\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 450,
+        "y": 200,
+        "wires": [
+            [
+                "th_telemetry_out_01"
+            ]
+        ]
+    },
+    {
+        "id": "th_telemetry_out_01",
+        "type": "mqtt out",
+        "z": "th_tab_01",
+        "name": "(Telemetry)PiltiSmart-TH-Probe",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "th_broker_01",
+        "x": 660,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "th_battery_01",
+        "type": "function",
+        "z": "th_tab_01",
+        "name": "Battery Level",
+        "func": "// Initialize battery level and state (on first run or retrieved from context)\nlet batteryLevel = context.get('batteryLevel');\nif (batteryLevel === undefined) {\n    batteryLevel = 0;  // Start at 0 on the first run\n}\n\nlet decreasing = context.get('decreasing');\nif (decreasing === undefined) {\n    decreasing = false;  // Default to charging mode if battery is low at the start\n}\n\n// Simulate the battery charging/discharging based on the current level\nif (batteryLevel < 80) {\n    // 80% chance to charge if battery level is below 80%\n    if (Math.random() < 0.8) {\n        decreasing = false;  // Charging mode\n    } else {\n        decreasing = true;  // Discharge mode (20% chance)\n    }\n} else {\n    // Above 80%, prioritize discharging\n    decreasing = true;\n}\n\n// Simulate the battery consumption and charging process\nif (decreasing) {\n    // Decrease battery level by a random value between 0 and 1\n    let randomDecrease = Math.random();  // Random decrease between 0 and 1\n    batteryLevel -= randomDecrease;\n\n    // Ensure battery level doesn't go below 0\n    if (batteryLevel <= 0) {\n        batteryLevel = 0;\n        decreasing = false;  // Switch to charging mode once the battery is depleted\n    }\n} else {\n    // Gradually charge the battery by a random value between 1 and 3 points\n    let chargeIncrease = Math.random() * (3 - 1) + 1;  // Random increase between 1 and 3\n    batteryLevel = Math.min(100, batteryLevel + chargeIncrease);  // Ensure it doesn't go over 100\n\n    // If the battery reaches full capacity, start discharging\n    if (batteryLevel >= 100) {\n        batteryLevel = 100;\n        decreasing = true;  // Start discharging once the battery is full\n    }\n}\n\n// Determine battery status based on the battery level\nlet out = {};\nif (batteryLevel < 20) {\n    out.batteryStatus = \"Low\";\n} else if (batteryLevel >= 20 && batteryLevel <= 99) {\n    out.batteryStatus = \"Normal\";\n} else {\n    out.batteryStatus = \"Full\";\n}\n\n// Simulate charging status (whether charging is occurring or not)\nlet isCharging = !decreasing;  // Charging when not decreasing\n\n// Create an output object to store the battery level, status, and charging state\nout.batteryLevel = batteryLevel.toFixed(2);  // Keep 2 decimal places\nout.batteryChargingStatus = isCharging ? \"Charging\" : \"Not charging\";  // Display \"Charging\" or \"Not charging\"\n\n// Save updated battery level and state to context\ncontext.set('batteryLevel', batteryLevel);\ncontext.set('decreasing', decreasing);\n\n// Output the current battery level, status, and charging state as JSON\nmsg.payload = out;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 380,
+        "wires": [
+            [
+                "th_attributes_out_01"
+            ]
+        ]
+    },
+    {
+        "id": "th_get_ip_01",
+        "type": "exec",
+        "z": "th_tab_01",
+        "command": "curl -s https://api.ipify.org",
+        "addpay": "",
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": false,
+        "oldrc": false,
+        "name": "Get IP",
+        "x": 390,
+        "y": 320,
+        "wires": [
+            [
+                "th_format_ip_01"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "th_format_ip_01",
+        "type": "function",
+        "z": "th_tab_01",
+        "name": "format IP",
+        "func": "context.set('myip', msg.payload.trim())\n\nmsg.payload = {\n    ipAddress: msg.payload.trim()\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 570,
+        "y": 320,
+        "wires": [
+            [
+                "th_attributes_out_01"
+            ]
+        ]
+    },
+    {
+        "id": "th_attributes_out_01",
+        "type": "mqtt out",
+        "z": "th_tab_01",
+        "name": "(Attributes)PiltiSmart-TH-Probe",
+        "topic": "v1/devices/me/attributes",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "th_broker_01",
+        "x": 660,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "th_broker_01",
+        "type": "mqtt-broker",
+        "name": "PiltiSmart-TH-Probe-Broker",
+        "broker": "mqtt-tb-sit.piltismart.org",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]

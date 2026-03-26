@@ -1,0 +1,204 @@
+[
+    {
+        "id": "755be412cc5591cc",
+        "type": "tab",
+        "label": "Ad Generator-Server",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "3c24722a80045ea7",
+        "type": "mqtt out",
+        "z": "755be412cc5591cc",
+        "name": "(Telemetry)Ad Generator-Server",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "073050e1135118b8",
+        "x": 770,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "286964d711b3a294",
+        "type": "mqtt in",
+        "z": "755be412cc5591cc",
+        "name": "(Attribute)Ad Generator-Server",
+        "topic": "v1/devices/me/attributes",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "073050e1135118b8",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 140,
+        "y": 140,
+        "wires": [
+            [
+                "fbae7be7359503af",
+                "3f0bb088d84d2543"
+            ]
+        ]
+    },
+    {
+        "id": "fbae7be7359503af",
+        "type": "debug",
+        "z": "755be412cc5591cc",
+        "name": "debug 359",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 370,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "c70e681ca91d2279",
+        "type": "debug",
+        "z": "755be412cc5591cc",
+        "name": "debug 360",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 730,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "3f0bb088d84d2543",
+        "type": "function",
+        "z": "755be412cc5591cc",
+        "name": "dataIntravelLimit",
+        "func": "let out ={}\nif (msg.payload.dataIntravel < 10) \n{ msg.payload.dataIntravel = 10}\n\nout.delay = (msg.payload.dataIntravel)*1000\n\nreturn out;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 140,
+        "wires": [
+            [
+                "eea42fc2e26cd8d5"
+            ]
+        ]
+    },
+    {
+        "id": "eea42fc2e26cd8d5",
+        "type": "trigger",
+        "z": "755be412cc5591cc",
+        "name": "dataIntravelContoller",
+        "op1": "1",
+        "op2": "0",
+        "op1type": "str",
+        "op2type": "str",
+        "duration": "-250",
+        "extend": false,
+        "overrideDelay": true,
+        "units": "s",
+        "reset": "",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 440,
+        "y": 220,
+        "wires": [
+            [
+                "28a575f941ae33f1"
+            ]
+        ]
+    },
+    {
+        "id": "28a575f941ae33f1",
+        "type": "function",
+        "z": "755be412cc5591cc",
+        "name": "ServerMetrics",
+        "func": "// Helper function to generate random number in a range\nfunction randomInRange(min, max) {\n    return +(Math.random() * (max - min) + min).toFixed(2);\n}\n\n// Build telemetry for this device\nlet out = {\n    cpu_usage: randomInRange(1, 10),          \n    memory_usage: randomInRange(1024, 6000),  \n    disk_usage: randomInRange(0, 40),         \n    network_speed: randomInRange(100, 10000)  \n};\nout.cpu_usage = out.cpu_usage + \"% of 2 CPUs\"\nout.memory_usage = out.memory_usage + \"MiB\"\nout.disk_usage = out.disk_usage + \"%\"\n// Set the new output in msg.payload\nmsg.payload = out;\n\n// Return updated message\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 540,
+        "y": 340,
+        "wires": [
+            [
+                "3c24722a80045ea7",
+                "c70e681ca91d2279"
+            ]
+        ]
+    },
+    {
+        "id": "e08490a24429fac4",
+        "type": "inject",
+        "z": "755be412cc5591cc",
+        "name": "Restart Device",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "3",
+        "topic": "",
+        "payload": "{\"dataIntravel\":30}",
+        "payloadType": "json",
+        "x": 140,
+        "y": 80,
+        "wires": [
+            [
+                "3f0bb088d84d2543"
+            ]
+        ]
+    },
+    {
+        "id": "073050e1135118b8",
+        "type": "mqtt-broker",
+        "name": "Ad Generator-Server",
+        "broker": "mqtt-tb-sit.piltismart.org",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]

@@ -1,0 +1,375 @@
+[
+    {
+        "id": "e8eb5aef210dfc58",
+        "type": "tab",
+        "label": "(sim)PiltiSmart-WL-Probe",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "c9d1d5f735172628",
+        "type": "mqtt out",
+        "z": "e8eb5aef210dfc58",
+        "name": "(Telemetry)WaterLevel-Probe",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "b3354e2896d1b58e",
+        "x": 720,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "dd354c380b194489",
+        "type": "function",
+        "z": "e8eb5aef210dfc58",
+        "name": "Battery Level",
+        "func": "// Initialize battery level and state (on first run or retrieved from context)\nlet batteryLevel = context.get('batteryLevel');\nif (batteryLevel === undefined) {\n    batteryLevel = 0;  // Start at 0 on the first run\n}\n\nlet decreasing = context.get('decreasing');\nif (decreasing === undefined) {\n    decreasing = false;  // Default to charging mode if battery is low at the start\n}\n\n// Simulate the battery charging/discharging based on the current level\nif (batteryLevel < 80) {\n    // 80% chance to charge if battery level is below 80%\n    if (Math.random() < 0.8) {\n        decreasing = false;  // Charging mode\n    } else {\n        decreasing = true;  // Discharge mode (20% chance)\n    }\n} else {\n    // Above 80%, prioritize discharging\n    decreasing = true;\n}\n\n// Simulate the battery consumption and charging process\nif (decreasing) {\n    // Decrease battery level by a random value between 0 and 1\n    let randomDecrease = Math.random();  // Random decrease between 0 and 1\n    batteryLevel -= randomDecrease;\n\n    // Ensure battery level doesn't go below 0\n    if (batteryLevel <= 0) {\n        batteryLevel = 0;\n        decreasing = false;  // Switch to charging mode once the battery is depleted\n    }\n} else {\n    // Gradually charge the battery by a random value between 1 and 3 points\n    let chargeIncrease = Math.random() * (3 - 1) + 1;  // Random increase between 1 and 3\n    batteryLevel = Math.min(100, batteryLevel + chargeIncrease);  // Ensure it doesn't go over 100\n\n    // If the battery reaches full capacity, start discharging\n    if (batteryLevel >= 100) {\n        batteryLevel = 100;\n        decreasing = true;  // Start discharging once the battery is full\n    }\n}\n\n// Determine battery status based on the battery level\nlet out = {};\nif (batteryLevel < 20) {\n    out.batteryStatus = \"Low\";\n} else if (batteryLevel >= 20 && batteryLevel <= 99) {\n    out.batteryStatus = \"Normal\";\n} else {\n    out.batteryStatus = \"Full\";\n}\n\n// Simulate charging status (whether charging is occurring or not)\nlet isCharging = !decreasing;  // Charging when not decreasing\n\n// Create an output object to store the battery level, status, and charging state\nout.batteryLevel = batteryLevel.toFixed(2);  // Keep 2 decimal places\nout.batteryChargingStatus = isCharging ? \"Charging\" : \"Not charging\";  // Display \"Charging\" or \"Not charging\"\n\n// Save updated battery level and state to context\ncontext.set('batteryLevel', batteryLevel);\ncontext.set('decreasing', decreasing);\n\n// Output the current battery level, status, and charging state as JSON\nmsg.payload = out;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 190,
+        "y": 300,
+        "wires": [
+            [
+                "0ba9cd73dd874d6c",
+                "ecb06be4d85c3646",
+                "0d4d4d5c426cb8b2"
+            ]
+        ]
+    },
+    {
+        "id": "0ba9cd73dd874d6c",
+        "type": "mqtt out",
+        "z": "e8eb5aef210dfc58",
+        "name": "(Attributes)WaterLevel-Probe",
+        "topic": "v1/devices/me/attributes",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "c9feeb9f4d7ffe14",
+        "x": 840,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "0af029b219fcac36",
+        "type": "function",
+        "z": "e8eb5aef210dfc58",
+        "name": "format IP",
+        "func": "// Get the result from the exec node which outputs the IP\nlet ipAddress = msg.payload.trim();  // Trim any extra spaces\n\n// Set the IP address in msg.payload\nmsg.payload = {\n    ipAddress: ipAddress\n};\n\n// Return the message object\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 320,
+        "wires": [
+            [
+                "0ba9cd73dd874d6c",
+                "ecb06be4d85c3646"
+            ]
+        ]
+    },
+    {
+        "id": "d2386668794075b6",
+        "type": "exec",
+        "z": "e8eb5aef210dfc58",
+        "command": "ifconfig eth0 | grep 'inet ' | awk '{print $2}'",
+        "addpay": "",
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": false,
+        "oldrc": false,
+        "name": "Get IP",
+        "x": 190,
+        "y": 340,
+        "wires": [
+            [
+                "0af029b219fcac36"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "5cc410c371e7ea92",
+        "type": "mqtt in",
+        "z": "e8eb5aef210dfc58",
+        "name": "(Attributes)WaterLevel-Probe",
+        "topic": "v1/devices/me/attributes",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "b3354e2896d1b58e",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 200,
+        "y": 140,
+        "wires": [
+            [
+                "978a77fe34a515f8",
+                "d1368e42ffc37e14"
+            ]
+        ]
+    },
+    {
+        "id": "f0c0548ef4c220bc",
+        "type": "trigger",
+        "z": "e8eb5aef210dfc58",
+        "name": "dataIntravelContoller",
+        "op1": "1",
+        "op2": "0",
+        "op1type": "str",
+        "op2type": "str",
+        "duration": "-250",
+        "extend": false,
+        "overrideDelay": true,
+        "units": "s",
+        "reset": "",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 180,
+        "y": 220,
+        "wires": [
+            [
+                "dd354c380b194489",
+                "d2386668794075b6",
+                "water-level-function"
+            ]
+        ]
+    },
+    {
+        "id": "978a77fe34a515f8",
+        "type": "function",
+        "z": "e8eb5aef210dfc58",
+        "name": "dataIntravelLimit",
+        "func": "let out ={}\nif (msg.payload.dataIntravel < 10) \n{ msg.payload.dataIntravel = 10}\n\nout.delay = (msg.payload.dataIntravel)*1000\n\nreturn out;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 510,
+        "y": 120,
+        "wires": [
+            [
+                "f0c0548ef4c220bc"
+            ]
+        ]
+    },
+    {
+        "id": "water-level-function",
+        "type": "function",
+        "z": "e8eb5aef210dfc58",
+        "name": "Simulate Water Level",
+        "func": "// Initialize water level and state (on first run or retrieved from context)\nlet waterLevel = context.get('waterLevel');\nif (waterLevel === undefined) {\n    waterLevel = 0;  // Start at 0 on the first run\n}\n\nlet decreasing = context.get('decreasing');\nif (decreasing === undefined) {\n    decreasing = false;  // Start by refilling if water level is 0 initially\n}\n\n// Simulate the water consumption and refill process\nif (decreasing) {\n    // Decrease water level by a random value between 0 and 10\n    let randomDecrease = Math.floor(Math.random() * 11);  // 0 to 15 inclusive\n    waterLevel -= randomDecrease;\n\n    // Ensure water level doesn't go below 0\n    if (waterLevel <= 0) {\n        waterLevel = 0;\n        decreasing = false;  // Switch to refill mode\n    }\n} else {\n    // During the refill phase, sometimes decreasing can also happen (30% chance)\n    let randomAction = Math.random(); // Generate a random number between 0 and 1\n    \n    if (randomAction < 0.3) {  // 30% chance to decrease during refill phase\n        let randomDecrease = Math.floor(Math.random() * 16);  // 0 to 15 inclusive\n        waterLevel -= randomDecrease;\n        \n        // Ensure water level doesn't go below 0\n        if (waterLevel < 0) {\n            waterLevel = 0;\n        }\n    } else {\n        // Gradually refill the water by 5 units at a time\n        waterLevel += 20;\n        \n        // Ensure water level doesn't exceed 100\n        if (waterLevel >= 100) {\n            waterLevel = 100;\n            decreasing = true;  // Switch back to decreasing mode once full\n        }\n    }\n}\n\n// Save updated water level and state to context\ncontext.set('waterLevel', waterLevel);\ncontext.set('decreasing', decreasing);\n\n// Output the current water level as JSON\nmsg.payload = { \"Water_Level(%)\": waterLevel };\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 220,
+        "y": 400,
+        "wires": [
+            [
+                "debug-water-level",
+                "c9d1d5f735172628",
+                "2e6d949448f73829"
+            ]
+        ]
+    },
+    {
+        "id": "debug-water-level",
+        "type": "debug",
+        "z": "e8eb5aef210dfc58",
+        "name": "Water Level Debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 550,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "6fdfbafa4819e40b",
+        "type": "inject",
+        "z": "e8eb5aef210dfc58",
+        "name": "Restart Device",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "3",
+        "topic": "",
+        "payload": "{\"dataIntravel\":120}",
+        "payloadType": "json",
+        "x": 160,
+        "y": 80,
+        "wires": [
+            [
+                "978a77fe34a515f8"
+            ]
+        ]
+    },
+    {
+        "id": "ecb06be4d85c3646",
+        "type": "mqtt out",
+        "z": "e8eb5aef210dfc58",
+        "name": "(Attributes)WaterLevel-Probe",
+        "topic": "v1/devices/me/attributes",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "c9feeb9f4d7ffe14",
+        "x": 640,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "2e6d949448f73829",
+        "type": "mqtt out",
+        "z": "e8eb5aef210dfc58",
+        "name": "(Telemetry)WaterLevel-Probe",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "c9feeb9f4d7ffe14",
+        "x": 640,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "d1368e42ffc37e14",
+        "type": "debug",
+        "z": "e8eb5aef210dfc58",
+        "name": "debug 4",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 360,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "0d4d4d5c426cb8b2",
+        "type": "mqtt out",
+        "z": "e8eb5aef210dfc58",
+        "name": "(Attributes)WaterLevel-Probe",
+        "topic": "v1/devices/me/attributes",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "b3354e2896d1b58e",
+        "x": 840,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "b3354e2896d1b58e",
+        "type": "mqtt-broker",
+        "name": "PiltiSmart-WL-Probe",
+        "broker": "mqtt-tb-sit.piltismart.org",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "c9feeb9f4d7ffe14",
+        "type": "mqtt-broker",
+        "name": "Waterlevel-Probe-CircularTank",
+        "broker": "mqtt-tb-sit.piltismart.org",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]

@@ -1,0 +1,240 @@
+[
+    {
+        "id": "76aa19e49fea3eca",
+        "type": "tab",
+        "label": "Smart Door Bell-Flow"
+    },
+    {
+        "id": "89e2511f0cf24241",
+        "type": "mqtt in",
+        "z": "76aa19e49fea3eca",
+        "name": "(Attribute)Smart-Door-Bell",
+        "topic": "v1/devices/me/attributes",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "sdb_broker_1",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 120,
+        "y": 120,
+        "wires": [
+            [
+                "1a6985f4e2d84127",
+                "5848fd1eae9c4e7a"
+            ]
+        ]
+    },
+    {
+        "id": "1a6985f4e2d84127",
+        "type": "debug",
+        "z": "76aa19e49fea3eca",
+        "name": "debug Smart-Door-Bell 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 350,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "230515bedb064d8f",
+        "type": "debug",
+        "z": "76aa19e49fea3eca",
+        "name": "debug Smart-Door-Bell 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 710,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "5848fd1eae9c4e7a",
+        "type": "function",
+        "z": "76aa19e49fea3eca",
+        "name": "dataIntravelLimit",
+        "func": "let out ={};\nif (msg.payload.dataIntravel < 10) \n{ msg.payload.dataIntravel = 10}\n\nout.delay = (msg.payload.dataIntravel)*1000\n\nreturn out;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 120,
+        "wires": [
+            [
+                "0d9245b3ddf949e1"
+            ]
+        ]
+    },
+    {
+        "id": "0d9245b3ddf949e1",
+        "type": "trigger",
+        "z": "76aa19e49fea3eca",
+        "name": "dataIntravelContoller",
+        "op1": "1",
+        "op2": "0",
+        "op1type": "str",
+        "op2type": "str",
+        "duration": "-250",
+        "extend": false,
+        "overrideDelay": true,
+        "units": "s",
+        "reset": "",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 420,
+        "y": 200,
+        "wires": [
+            [
+                "96692435dd3d443b",
+                "90345c7876954e85"
+            ]
+        ]
+    },
+    {
+        "id": "96692435dd3d443b",
+        "type": "function",
+        "z": "76aa19e49fea3eca",
+        "name": "SmartDoorBellMetrics",
+        "func": "// Helper function to generate random number in a range\nfunction randomInt(min, max) {\n    return Math.floor(Math.random() * (max - min + 1)) + min;\n}\n\n// Build telemetry for this device\nlet out = {\n    ring_count_numeric: randomInt(0, 5) > 4 ? 1 : 0,\n    motion_detected_numeric: Math.random() > 0.7 ? 1 : 0,\n    signal_strength_numeric: randomInt(-85, -40),\n    camera_status_numeric: Math.random() > 0.1 ? 1 : 0,\n    temperature_numeric: randomInt(15, 35)\n};\n\n// Add formatted string values\nout.ring_count = out.ring_count_numeric + \" rings\";\nout.motion_detected = out.motion_detected_numeric === 1 ? \"Motion Detected\" : \"Clear\";\nout.signal_strength = out.signal_strength_numeric + \" dBm\";\nout.camera_status = out.camera_status_numeric === 1 ? \"Online\" : \"Offline\";\nout.temperature = out.temperature_numeric + \" °C\";\n\n// Set the new output in msg.payload\nmsg.payload = out;\n\n// Return updated message\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 320,
+        "wires": [
+            [
+                "230515bedb064d8f",
+                "fc2de9f2a983453a"
+            ]
+        ]
+    },
+    {
+        "id": "a530ae1fb6d546ca",
+        "type": "inject",
+        "z": "76aa19e49fea3eca",
+        "name": "Restart Device",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "3",
+        "topic": "",
+        "payload": "{\"dataIntravel\":30}",
+        "payloadType": "json",
+        "x": 120,
+        "y": 60,
+        "wires": [
+            [
+                "5848fd1eae9c4e7a"
+            ]
+        ]
+    },
+    {
+        "id": "fc2de9f2a983453a",
+        "type": "mqtt out",
+        "z": "76aa19e49fea3eca",
+        "name": "(Telemetry)Smart-Door-Bell",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "sdb_broker_1",
+        "x": 730,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "90345c7876954e85",
+        "type": "function",
+        "z": "76aa19e49fea3eca",
+        "name": "BatteryMetrics",
+        "func": "// Helper function to generate random number in a range\nfunction randomInt(min, max) {\n    return Math.floor(Math.random() * (max - min + 1)) + min;\n}\n\n// Get or initialize battery state \nlet batteryLevel = flow.get('batteryLevel') || randomInt(50, 100); \nlet isCharging = flow.get('isCharging') || false;\n\n// Simulate battery cycle\nif (isCharging) {\n    batteryLevel += randomInt(1, 3);\n    if (batteryLevel >= 100) {\n        batteryLevel = 100;\n        isCharging = false;\n    }\n} else {\n    batteryLevel -= randomInt(1, 2);\n    if (batteryLevel <= 15) {\n        isCharging = true;\n    }\n}\n\n// Determine battery status\nlet batteryStatus = \"Normal\";\nif (batteryLevel <= 20) {\n    batteryStatus = \"Low\";\n} else if (batteryLevel >= 95 && isCharging) {\n    batteryStatus = \"Full\";\n}\n\n// Save state for next run\nflow.set('batteryLevel', batteryLevel);\nflow.set('isCharging', isCharging);\n\n// Build attribute payload\nmsg.payload = {\n    batteryLevel: batteryLevel,\n    batteryStatus: batteryStatus,\n    batteryChargingStatus: isCharging ? \"Charging\" : \"Not Charging\"\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 420,
+        "wires": [
+            [
+                "18f95f14e6c64366"
+            ]
+        ]
+    },
+    {
+        "id": "18f95f14e6c64366",
+        "type": "mqtt out",
+        "z": "76aa19e49fea3eca",
+        "name": "(Attributes)Smart-Door-Bell",
+        "topic": "v1/devices/me/attributes",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "sdb_broker_1",
+        "x": 920,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "sdb_broker_1",
+        "type": "mqtt-broker",
+        "name": "Smart-Door-Bell-Broker",
+        "broker": "mqtt-tb-sit.piltismart.org",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]
