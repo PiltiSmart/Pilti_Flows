@@ -13,12 +13,44 @@ The ecosystem is managed through a centralized deployment framework that automat
 - **Dynamic Configuration**: Support for profile auto-assignment (`new_profile`) and flow preservation/replacement (`newflow`).
 
 ### Deployment Orchestrator: `deploy.py`
-A robust Python-based tool that:
-1.  **ThingsBoard Authentication**: Securely authenticates with the ThingsBoard API.
-2.  **Device Lifecycle Management**: Automatically creates or retrieves existing devices, assigns them to the correct **Device Profile**, and extracts the unique **Access Token**.
-3.  **Flow Token Injection**: Dynamically injects the ThingsBoard Access Token into the Node-RED `mqtt-broker` configuration.
-4.  **Node-RED ID Management**: Internally regenerates all node IDs before deployment to eliminate `duplicate id (400)` conflicts.
-5.  **Smart Tab Updates**: Intelligently identifies existing flow tabs and issues a `PUT` update to replace logic without duplicating tabs.
+
+The `deploy.py` script is a sophisticated IoT DevOps utility designed for **Continuous Integration and Continuous Deployment (CI/CD)** of Node-RED flows. It abstracts the complexity of manual device provisioning and flow configuration, ensuring a "zero-touch" deployment experience.
+
+#### Enterprise Features:
+-   **Automated Device Provisioning**: Automatically handles ThingsBoard device creation and profile assignment.
+-   **Dynamic Credential Injection**: Extracts secure MQTT access tokens and injects them directly into Node-RED broker nodes.
+-   **ID Collision Prevention**: Employs a unique ID regeneration algorithm to ensure that redeploying flows never causes "Duplicate ID" errors in Node-RED.
+-   **Intelligent Lifecycle Management**: Supports both creating new flow instances (with automatic timestamping for duplicates) and updating existing live flows without service interruption.
+-   **SSL/TLS Readiness**: Configured to handle secure communication across enterprise networks.
+
+#### Deployment Lifecycle Flowchart:
+
+```mermaid
+sequenceDiagram
+    participant Admin as DevOps/Admin
+    participant Script as deploy.py
+    participant TB as ThingsBoard API
+    participant NR as Node-RED API
+
+    Admin->>Script: Execute (python3 deploy.py)
+    Script->>Script: Load config.json
+    Script->>TB: POST /api/auth/login (JWT Auth)
+    Script->>TB: GET /api/tenant/devices (Check Exists)
+    ALT Device Not Found
+        Script->>TB: POST /api/device (Create Device)
+    END
+    Script->>TB: GET /api/device/{id}/credentials (Get Token)
+    Script->>Script: Inject Token into MQTT Nodes
+    Script->>Script: Regenerate Node IDs (UUIDv4)
+    Script->>NR: GET /flows (Sync Logic)
+    ALT newflow = "yes" & Label Exists
+        Script->>Script: Append Datetime to Label
+    ELSE newflow = "no" & Label Exists
+        Script->>Script: Map IDs to Existing Tab
+    END
+    Script->>NR: POST/PUT /flow (Deploy Flow)
+    NR-->>Admin: Deployment Success/Status
+```
 
 ---
 
