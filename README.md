@@ -33,14 +33,14 @@ sequenceDiagram
     participant NR as Node-RED API
 
     Admin->>Script: Execute (python3 deploy.py)
-    Script->>Script: Load config.json
+    Script->>Script: Load config.json (TB Broker URL & Credentials)
     Script->>TB: POST /api/auth/login (JWT Auth)
     Script->>TB: GET /api/tenant/devices (Check Exists)
     ALT Device Not Found
         Script->>TB: POST /api/device (Create Device)
     END
     Script->>TB: GET /api/device/{id}/credentials (Get Token)
-    Script->>Script: Inject Token and Broker Details into MQTT Nodes
+    Script->>Script: Inject Token & TB Broker Details into MQTT Nodes
     Script->>Script: Regenerate Node IDs (UUIDv4)
     Script->>NR: GET /flows (Sync Logic)
     ALT newflow = "yes" & Label Exists
