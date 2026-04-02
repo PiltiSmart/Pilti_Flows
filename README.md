@@ -8,7 +8,7 @@ The ecosystem is managed through a centralized deployment framework that automat
 
 ### Centralized Configuration: `config.json`
 `config.json` defines all critical connectivity and provisioning parameters:
-- **ThingsBoard Integration**: URLs, administrative credentials, and targeted device names.
+- **ThingsBoard Integration**: URLs, administrative credentials, MQTT broker connection details, and targeted device names.
 - **Node-RED Orchestration**: Target Node-RED instance and specific JSON flow file path.
 - **Dynamic Configuration**: Support for profile auto-assignment (`new_profile`) and flow preservation/replacement (`newflow`).
 
@@ -18,7 +18,7 @@ The `deploy.py` script is a sophisticated IoT DevOps utility designed for **Cont
 
 #### Enterprise Features:
 -   **Automated Device Provisioning**: Automatically handles ThingsBoard device creation and profile assignment.
--   **Dynamic Credential Injection**: Extracts secure MQTT access tokens and injects them directly into Node-RED broker nodes.
+-   **Dynamic Credential & Broker Injection**: Extracts secure MQTT access tokens and dynamically resolves broker connection details from config, injecting them directly into Node-RED broker nodes.
 -   **ID Collision Prevention**: Employs a unique ID regeneration algorithm to ensure that redeploying flows never causes "Duplicate ID" errors in Node-RED.
 -   **Intelligent Lifecycle Management**: Supports both creating new flow instances (with automatic timestamping for duplicates) and updating existing live flows without service interruption.
 -   **SSL/TLS Readiness**: Configured to handle secure communication across enterprise networks.
@@ -40,7 +40,7 @@ sequenceDiagram
         Script->>TB: POST /api/device (Create Device)
     END
     Script->>TB: GET /api/device/{id}/credentials (Get Token)
-    Script->>Script: Inject Token into MQTT Nodes
+    Script->>Script: Inject Token and Broker Details into MQTT Nodes
     Script->>Script: Regenerate Node IDs (UUIDv4)
     Script->>NR: GET /flows (Sync Logic)
     ALT newflow = "yes" & Label Exists

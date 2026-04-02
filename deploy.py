@@ -129,15 +129,24 @@ def deploy_flow(filepath, config):
 
     print(f"Device Access Token: {access_token}")
 
-    # Inject Access Token into MQTT Broker node
+    # Inject Access Token and Broker Details into MQTT Broker node
     modified = False
+    broker_url = config.get('thingsboard', {}).get('broker')
+
     for node in flow_data:
         if node.get('type') == 'mqtt-broker':
             node['credentials'] = {
                 'user': access_token,
                 'password': ''
             }
-            print(f"Updated MQTT Broker node '{node.get('name')}' with Access Token inside credentials.")
+            if broker_url:
+                parsed_url = urllib.parse.urlparse(broker_url if '://' in broker_url else f'mqtt://{broker_url}')
+                if parsed_url.hostname:
+                    node['broker'] = parsed_url.hostname
+                if parsed_url.port:
+                    node['port'] = str(parsed_url.port)
+                    
+            print(f"Updated MQTT Broker node '{node.get('name')}' with Access Token and Broker Details.")
             modified = True
     
     if not modified:

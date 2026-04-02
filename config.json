@@ -1,14 +1,15 @@
 {
     "thingsboard": {
-        "url": "https://tb.piltismart.com",
+        "url": "https://tb-test.piltismart.com",
         "username": "sudharsan@piltigroup.com",
         "password": "123456",
-        "device_name": "Smart-Attendance-test1",
+        "broker": "http://192.168.1.152",
+        "device_name": "Smart-Attendance",
         "new_profile": "no",
-        "profile_name": "Profile-test"
+        "profile_name": "default"
     },
     "nodered": {
-        "url": "https://piltiflows.piltismart.com",
+        "url": "https://test-piltiflows.piltismart.com",
         "flow_file": "Smart_attendence_tracker_flow.json",
         "newflow": "yes"
     }
