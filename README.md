@@ -73,6 +73,36 @@ Pilti_Flows/
 
 ---
 
+## 🚀 Quickstart: New Device Deployment
+
+Follow these steps to deploy a new device flow from scratch after cloning the repository:
+
+### 1. Initial Setup
+Install the necessary Python dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Configure Connectivity
+Update `config/config.json` with your ThingsBoard and Node-RED parameters:
+- **ThingsBoard**: Set `url`, `username`, `password`, and `broker`.
+- **New Device**: Update `device_name` to your desired name (e.g., `"Meeting-Room-Sensor"`).
+- **Node-RED**: Update `url` and set `flow_file` to the JSON filename you want to deploy (e.g., `"Motion_Sensor_flow.json"`).
+
+### 3. Generate the Flow (Optional)
+If you want to create a specialized flow based on a template, run the corresponding generator:
+```bash
+python3 scripts/generators/pd_gen.py
+```
+
+### 4. Execute Deployment
+Run the orchestrator to provision the device in ThingsBoard and push the flow to Node-RED in one step:
+```bash
+python3 scripts/tools/deploy.py
+```
+
+---
+
 ## 🛠️ Usage Guide
 
 ### 1. Generating a New Flow
