@@ -1,0 +1,243 @@
+[
+    {
+        "id": "msl_tab_1",
+        "type": "tab",
+        "label": "Motion sensor lights with Auto brightness adjustment-Flow",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "msl_mqtt_in_1",
+        "type": "mqtt in",
+        "z": "msl_tab_1",
+        "name": "(Attribute)Motion-Sensor-Lights-With-Auto-Brightness-Adjustment",
+        "topic": "v1/devices/me/attributes",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "msl_broker_1",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 160,
+        "y": 120,
+        "wires": [
+            [
+                "msl_debug_1",
+                "msl_limit_1"
+            ]
+        ]
+    },
+    {
+        "id": "msl_debug_1",
+        "type": "debug",
+        "z": "msl_tab_1",
+        "name": "debug Motion-Sensor-Lights-With-Auto-Brightness-Adjustment 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 400,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "msl_debug_2",
+        "type": "debug",
+        "z": "msl_tab_1",
+        "name": "debug Motion-Sensor-Lights-With-Auto-Brightness-Adjustment 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 760,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "msl_limit_1",
+        "type": "function",
+        "z": "msl_tab_1",
+        "name": "dataIntravelLimit",
+        "func": "let out ={};\nif (msg.payload.dataIntravel < 10) \n{ msg.payload.dataIntravel = 10}\n\nout.delay = (msg.payload.dataIntravel)*1000\n\nreturn out;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 120,
+        "wires": [
+            [
+                "msl_controller_1"
+            ]
+        ]
+    },
+    {
+        "id": "msl_controller_1",
+        "type": "trigger",
+        "z": "msl_tab_1",
+        "name": "dataIntravelContoller",
+        "op1": "1",
+        "op2": "0",
+        "op1type": "str",
+        "op2type": "str",
+        "duration": "-250",
+        "extend": false,
+        "overrideDelay": true,
+        "units": "s",
+        "reset": "",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 420,
+        "y": 200,
+        "wires": [
+            [
+                "msl_metrics_1",
+                "msl_battery_1"
+            ]
+        ]
+    },
+    {
+        "id": "msl_metrics_1",
+        "type": "function",
+        "z": "msl_tab_1",
+        "name": "MotionSensorLightMetrics",
+        "func": "// Helper function to generate random integer\nfunction randomInt(min, max) {\n    return Math.floor(Math.random() * (max - min + 1)) + min;\n}\n\n// Build telemetry tailored for Motion sensor lights\nlet motion = Math.random() > 0.7 ? 1 : 0;\nlet ambient = randomInt(5, 800);\nlet state = 0;\nlet brightness = 0;\n\n// Auto brightness logic\nif (motion === 1) {\n    state = 1;\n    if (ambient < 50) brightness = 100;\n    else if (ambient < 200) brightness = 75;\n    else if (ambient < 500) brightness = 50;\n    else brightness = 10;\n}\n\nlet out = {\n    motion_detected_numeric: motion,\n    light_state_numeric: state,\n    ambient_light_lux_numeric: ambient,\n    brightness_percent_numeric: brightness,\n};\n\n// Add formatted string values\nout.motion_detected = motion === 1 ? \"Detected\" : \"Clear\";\nout.light_state = state === 1 ? \"ON\" : \"OFF\";\nout.ambient_light_lux = ambient + \" lux\";\nout.brightness_percent = brightness + \" %\";\n\n// Set the new output in msg.payload\nmsg.payload = out;\n\n// Return updated message\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 320,
+        "wires": [
+            [
+                "msl_debug_2",
+                "msl_telemetry_out_1"
+            ]
+        ]
+    },
+    {
+        "id": "msl_restart_1",
+        "type": "inject",
+        "z": "msl_tab_1",
+        "name": "Restart Device",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "3",
+        "topic": "",
+        "payload": "{\"dataIntravel\":30}",
+        "payloadType": "json",
+        "x": 120,
+        "y": 60,
+        "wires": [
+            [
+                "msl_limit_1"
+            ]
+        ]
+    },
+    {
+        "id": "msl_telemetry_out_1",
+        "type": "mqtt out",
+        "z": "msl_tab_1",
+        "name": "(Telemetry)Motion-Sensor-Lights-With-Auto-Brightness-Adjustment",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "msl_broker_1",
+        "x": 810,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "msl_battery_1",
+        "type": "function",
+        "z": "msl_tab_1",
+        "name": "BatteryMetrics",
+        "func": "// Helper function to generate random number in a range\nfunction randomInt(min, max) {\n    return Math.floor(Math.random() * (max - min + 1)) + min;\n}\n\n// Get or initialize battery state \nlet batteryLevel = flow.get('batteryLevel') || randomInt(50, 100); \nlet isCharging = flow.get('isCharging') || false;\n\n// Simulate battery cycle\nif (isCharging) {\n    batteryLevel += randomInt(1, 3);\n    if (batteryLevel >= 100) {\n        batteryLevel = 100;\n        isCharging = false;\n    }\n} else {\n    batteryLevel -= randomInt(1, 2);\n    if (batteryLevel <= 15) {\n        isCharging = true;\n    }\n}\n\n// Determine battery status\nlet batteryStatus = \"Normal\";\nif (batteryLevel <= 20) {\n    batteryStatus = \"Low\";\n} else if (batteryLevel >= 95 && isCharging) {\n    batteryStatus = \"Full\";\n}\n\n// Save state for next run\nflow.set('batteryLevel', batteryLevel);\nflow.set('isCharging', isCharging);\n\n// Build attribute payload\nmsg.payload = {\n    batteryLevel: batteryLevel,\n    batteryStatus: batteryStatus,\n    batteryChargingStatus: isCharging ? \"Charging\" : \"Not Charging\"\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 420,
+        "wires": [
+            [
+                "msl_attributes_out_1"
+            ]
+        ]
+    },
+    {
+        "id": "msl_attributes_out_1",
+        "type": "mqtt out",
+        "z": "msl_tab_1",
+        "name": "(Attributes)Motion-Sensor-Lights-With-Auto-Brightness-Adjustment",
+        "topic": "v1/devices/me/attributes",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "msl_broker_1",
+        "x": 910,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "msl_broker_1",
+        "type": "mqtt-broker",
+        "name": "Motion-Sensor-Lights-With-Auto-Brightness-Adjustment-Broker",
+        "broker": "mqtt-tb-sit.piltismart.org",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]

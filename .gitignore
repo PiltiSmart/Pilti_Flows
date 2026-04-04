@@ -1,9 +1,22 @@
+# macOS
 .DS_Store
+
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+vclenv/
+.env/
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Project Specific
 .system_generated/
-brain/
-implementation_plan.md
-walkthrough.md
-task.md
+/implementation_plan.md
+/walkthrough.md
+/task.md
 .gemini/

@@ -1,7 +1,11 @@
 import json
-import uuid
+import os
 
-with open("Motion_Sensor_flow.json", 'r') as f:
+# Use absolute path relative to script location for templates and deployed flows
+template_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../flows/templates/Motion_Sensor_flow.json"))
+output_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../flows/deployed/Smart_attendence_tracker_flow.json"))
+
+with open(template_path, 'r') as f:
     flow = json.load(f)
 
 for node in flow:
@@ -38,6 +42,7 @@ out.status_numeric = (out.status === "Present" || out.status === "Late" || out.s
 msg.payload = out;
 return msg;
 """
-with open("Smart_attendence_tracker_flow.json", 'w') as f:
+
+with open(output_path, 'w') as f:
     json.dump(flow, f, indent=4)
-print("Generated Smart_attendence_tracker_flow.json successfully.")
+print(f"Generated {os.path.basename(output_path)} successfully.")

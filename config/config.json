@@ -4,13 +4,13 @@
         "username": "sudharsan@piltigroup.com",
         "password": "123456",
         "broker": "http://192.168.1.152",
-        "device_name": "Smart-Attendance",
-        "new_profile": "no",
-        "profile_name": "default"
+        "device_name": "Motion-Sensor",
+        "new_profile": "yes",
+        "profile_name": "PiltiSmart-MotionSensor-Probe"
     },
     "nodered": {
         "url": "https://test-piltiflows.piltismart.com",
-        "flow_file": "Smart_attendence_tracker_flow.json",
-        "newflow": "yes"
+        "flow_file": "Motion_Sensor_flow.json",
+        "newflow": "no"
     }
 }

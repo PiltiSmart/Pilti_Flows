@@ -11,7 +11,8 @@ import os
 ssl._create_default_https_context = ssl._create_unverified_context
 
 def load_config():
-    config_path = os.path.join(os.path.dirname(__file__), 'config.json')
+    # Look for config.json in the config directory relative to the script's new location
+    config_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../config/config.json'))
     try:
         with open(config_path, 'r') as f:
             return json.load(f)
@@ -255,4 +256,11 @@ if __name__ == "__main__":
     else:
         filepath = sys.argv[1]
         
+    # If the filepath is a simple filename and doesn't exist locally,
+    # try looking in the flows/deployed/ directory
+    if not os.path.exists(filepath) and not os.path.isabs(filepath):
+        deployed_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../flows/deployed/', filepath))
+        if os.path.exists(deployed_path):
+            filepath = deployed_path
+
     deploy_flow(filepath, config)

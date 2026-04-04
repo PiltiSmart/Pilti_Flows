@@ -6,13 +6,13 @@ This repository contains a collection of enterprise-grade Node-RED flows designe
 
 The ecosystem is managed through a centralized deployment framework that automates ThingsBoard device provisioning and Node-RED flow orchestration.
 
-### Centralized Configuration: `config.json`
-`config.json` defines all critical connectivity and provisioning parameters:
+### Centralized Configuration: `config/config.json`
+`config/config.json` defines all critical connectivity and provisioning parameters:
 - **ThingsBoard Integration**: URLs, administrative credentials, MQTT broker connection details, and targeted device names.
-- **Node-RED Orchestration**: Target Node-RED instance and specific JSON flow file path.
+- **Node-RED Orchestration**: Target Node-RED instance and specific JSON flow file path (searched in `flows/deployed/` by default).
 - **Dynamic Configuration**: Support for profile auto-assignment (`new_profile`) and flow preservation/replacement (`newflow`).
 
-### Deployment Orchestrator: `deploy.py`
+### Deployment Orchestrator: `scripts/tools/deploy.py`
 
 The `deploy.py` script is a sophisticated IoT DevOps utility designed for **Continuous Integration and Continuous Deployment (CI/CD)** of Node-RED flows. It abstracts the complexity of manual device provisioning and flow configuration, ensuring a "zero-touch" deployment experience.
 
@@ -32,8 +32,8 @@ sequenceDiagram
     participant TB as ThingsBoard API
     participant NR as Node-RED API
 
-    Admin->>Script: Execute (python3 deploy.py)
-    Script->>Script: Load config.json (TB Broker URL & Credentials)
+    Admin->>Script: Execute (python3 scripts/tools/deploy.py)
+    Script->>Script: Load config/config.json (TB Broker URL & Credentials)
     Script->>TB: POST /api/auth/login (JWT Auth)
     Script->>TB: GET /api/tenant/devices (Check Exists)
     ALT Device Not Found
@@ -50,6 +50,50 @@ sequenceDiagram
     END
     Script->>NR: POST/PUT /flow (Deploy Flow)
     NR-->>Admin: Deployment Success/Status
+```
+
+---
+
+## 📂 Project Structure
+
+```text
+Pilti_Flows/
+├── config/
+│   └── config.json              # Central configuration (ThingsBoard & Node-RED)
+├── flows/
+│   ├── templates/               # Base flows used as templates for generation
+│   └── deployed/                # Production-ready or generated flows
+├── scripts/
+│   ├── generators/              # Transformation scripts (*_gen.py)
+│   └── tools/                   # DevOps & Deployment utilities (deploy.py)
+├── tests/                       # Test and verification scripts
+├── README.md                    # Project documentation
+└── requirements.txt             # Dependency manifest
+```
+
+---
+
+## 🛠️ Usage Guide
+
+### 1. Generating a New Flow
+To generate a specialized flow from a template (e.g., creating a Presence Detector flow from the Motion Sensor template):
+
+```bash
+python3 scripts/generators/pd_gen.py
+```
+*Generated flows are automatically saved to `flows/deployed/`.*
+
+### 2. Deploying a Flow
+To deploy a flow to Node-RED and provision the device in ThingsBoard:
+
+**Option A: Using Config Default** (defined in `config/config.json`)
+```bash
+python3 scripts/tools/deploy.py
+```
+
+**Option B: Specifying a Flow File**
+```bash
+python3 scripts/tools/deploy.py flows/deployed/AQI_flow.json
 ```
 
 ---
