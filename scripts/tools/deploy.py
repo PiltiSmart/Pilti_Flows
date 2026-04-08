@@ -257,10 +257,19 @@ if __name__ == "__main__":
         filepath = sys.argv[1]
         
     # If the filepath is a simple filename and doesn't exist locally,
-    # try looking in the flows/deployed/ directory
+    # try looking in all subdirectories of the flows/ directory
     if not os.path.exists(filepath) and not os.path.isabs(filepath):
-        deployed_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../flows/deployed/', filepath))
-        if os.path.exists(deployed_path):
-            filepath = deployed_path
+        flows_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../flows/'))
+        found = False
+        for root, dirs, files in os.walk(flows_root):
+            if filepath in files:
+                filepath = os.path.join(root, filepath)
+                found = True
+                break
+        if not found:
+            # Fallback to templates if still not found
+            templates_path = os.path.join(flows_root, 'templates', filepath)
+            if os.path.exists(templates_path):
+                filepath = templates_path
 
     deploy_flow(filepath, config)

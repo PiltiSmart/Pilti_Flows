@@ -3,7 +3,7 @@ import os
 
 # Use absolute path relative to script location for templates and deployed flows
 template_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../flows/templates/Motion_Sensor_flow.json"))
-output_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../flows/deployed/Smart_Plugs_with_energy_monitor_flow.json"))
+output_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../flows/smart_home/Smart_Plugs_with_energy_monitor_flow.json"))
 
 with open(template_path, "r") as f:
     flow = json.load(f)

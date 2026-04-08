@@ -10,7 +10,7 @@
     },
     "nodered": {
         "url": "https://test-piltiflows.piltismart.com",
-        "flow_file": "Motion_Sensor_flow.json",
+        "flow_file": "Smart_Motion_Sensor_flow.json",
         "newflow": "no"
     }
 }
