@@ -4,13 +4,13 @@
         "username": "sudharsan@piltigroup.com",
         "password": "123456",
         "broker": "http://192.168.1.152",
-        "device_name": "Motion-Sensor",
-        "new_profile": "yes",
-        "profile_name": "PiltiSmart-MotionSensor-Probe"
+        "device_name": "Air-Quality-Monitor",
+        "new_profile": "no",
+        "profile_name": "PiltiSmart-AQI-Probe"
     },
     "nodered": {
         "url": "https://test-piltiflows.piltismart.com",
-        "flow_file": "Smart_Motion_Sensor_flow.json",
+        "flow_file": "PiltiSmart-AQI-Probe.json",
         "newflow": "no"
     }
 }

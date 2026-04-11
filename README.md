@@ -9,8 +9,8 @@ The ecosystem is managed through a centralized deployment framework that automat
 ### Centralized Configuration: `config/config.json`
 `config/config.json` defines all critical connectivity and provisioning parameters:
 - **ThingsBoard Integration**: URLs, administrative credentials, MQTT broker connection details, and targeted device names.
-- **Node-RED Orchestration**: Target Node-RED instance and specific JSON flow file path (searched in `flows/deployed/` by default).
-- **Dynamic Configuration**: Support for profile auto-assignment (`new_profile`) and flow preservation/replacement (`newflow`).
+- **Node-RED Orchestration**: Target Node-RED instance and specific JSON flow file path.
+- **Dynamic Naming (Option B)**: Profile names are automatically generated using the pattern `PiltiSmart-{device_name}-Probe`. This convention is enforced across filenames and Node-RED flow labels to maintain enterprise consistency.
 
 ### Deployment Orchestrator: `scripts/tools/deploy.py`
 
@@ -21,6 +21,7 @@ The `deploy.py` script is a sophisticated IoT DevOps utility designed for **Cont
 -   **Dynamic Credential & Broker Injection**: Extracts secure MQTT access tokens and dynamically resolves broker connection details from config, injecting them directly into Node-RED broker nodes.
 -   **ID Collision Prevention**: Employs a unique ID regeneration algorithm to ensure that redeploying flows never causes "Duplicate ID" errors in Node-RED.
 -   **Intelligent Lifecycle Management**: Supports both creating new flow instances (with automatic timestamping for duplicates) and updating existing live flows without service interruption.
+-   **In-Flow Documentation**: Automatically injects high-level `comment` nodes into flows containing industry status, telemetry metrics, and lifecycle overviews for operational clarity.
 -   **SSL/TLS Readiness**: Configured to handle secure communication across enterprise networks.
 
 #### Deployment Lifecycle Flowchart:
@@ -61,8 +62,14 @@ Pilti_Flows/
 ├── config/
 │   └── config.json              # Central configuration (ThingsBoard & Node-RED)
 ├── flows/
-│   ├── templates/               # Base flows used as templates for generation
-│   └── deployed/                # Production-ready or generated flows
+│   ├── smart_home/              # Home automation and air quality flows
+│   ├── smart_office/            # Attendance and occupancy flows
+│   ├── smart_farming/           # Agricultural and water management flows
+│   ├── smart_hospitals/         # Healthcare and medical IoT flows
+│   ├── smart_industry/          # Industrial monitoring and automation
+│   ├── smart_schools/           # Educational infrastructure monitoring
+│   ├── smart_publishing/        # Media and publishing automation
+│   └── templates/               # Base flows used as templates for generation
 ├── scripts/
 │   ├── generators/              # Transformation scripts (*_gen.py)
 │   └── tools/                   # DevOps & Deployment utilities (deploy.py)
@@ -86,8 +93,8 @@ pip install -r requirements.txt
 ### 2. Configure Connectivity
 Update `config/config.json` with your ThingsBoard and Node-RED parameters:
 - **ThingsBoard**: Set `url`, `username`, `password`, and `broker`.
-- **New Device**: Update `device_name` to your desired name (e.g., `"Meeting-Room-Sensor"`).
-- **Node-RED**: Update `url` and set `flow_file` to the JSON filename you want to deploy (e.g., `"Motion_Sensor_flow.json"`).
+- **New Device**: Update `device_name` to your desired name (e.g., `"Motion-Sensor"`).
+- **Automated Naming**: The system will automatically resolve the flow to `PiltiSmart-Motion-Sensor-Probe.json`.
 
 ### 3. Generate the Flow (Optional)
 If you want to create a specialized flow based on a template, run the corresponding generator:
@@ -109,9 +116,9 @@ python3 scripts/tools/deploy.py
 To generate a specialized flow from a template (e.g., creating a Presence Detector flow from the Motion Sensor template):
 
 ```bash
-python3 scripts/generators/pd_gen.py
+python3 scripts/generators/msl_gen.py
 ```
-*Generated flows are automatically saved to `flows/deployed/`.*
+*Generated flows are automatically saved to their respective sector-specific folders (e.g., `flows/smart_home/`) using the enterprise naming pattern.*
 
 ### 2. Deploying a Flow
 To deploy a flow to Node-RED and provision the device in ThingsBoard:
@@ -123,7 +130,7 @@ python3 scripts/tools/deploy.py
 
 **Option B: Specifying a Flow File**
 ```bash
-python3 scripts/tools/deploy.py flows/deployed/AQI_flow.json
+python3 scripts/tools/deploy.py flows/smart_home/PiltiSmart-Motion-Sensor-Probe.json
 ```
 
 ---

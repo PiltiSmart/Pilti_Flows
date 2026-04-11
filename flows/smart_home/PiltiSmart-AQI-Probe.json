@@ -7,6 +7,16 @@
         "info": ""
     },
     {
+        "id": "aqi_comment_01",
+        "type": "comment",
+        "z": "aqi_tab_01",
+        "name": "Flow Description & Expansion",
+        "info": "### PiltiSmart AQI (Air Quality Index) Probe\n\n**Industry Status**: Environmental Health and Safety (EHS) Compliance.\n\n**Description**: \nProvides high-fidelity monitoring of critical atmospheric pollutants and overall air safety indices using real-time OpenWeatherMap data.\n\n**Telemetry Metrics**:\n- `aqi`: Air Quality Index (1-5 scale)\n- `pm2_5` & `pm10`: Particulate matter content.\n- `so2`, `no2`, `co`, `o3`: Gaseous pollutant levels.\n\n**Lifecycle Overview**:\n1. **Remote Config**: Listens for `dataIntravel` attribute updates via MQTT.\n2. **Rate Limiting**: Enforces a minimum 10s interval to prevent API abuse.\n3. **Metric Acquisition**: Fetches real-time pollutants from OpenWeatherMap API and retrieves public IP via IPify.\n4. **Telemetry/Attribute Sync**: Publishes environmental data and device status (battery, IP) to ThingsBoard.",
+        "x": 160,
+        "y": 20,
+        "wires": []
+    },
+    {
         "id": "aqi_mqtt_in_01",
         "type": "mqtt in",
         "z": "aqi_tab_01",

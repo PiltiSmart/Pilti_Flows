@@ -10,6 +10,18 @@ import os
 # Bypass SSL verification for macOS Python which may lack local certificates
 ssl._create_default_https_context = ssl._create_unverified_context
 
+# Mapping of profile acronyms to original descriptive device names in ThingsBoard
+ACRONYM_MAP = {
+    "SAT": "Smart-Attendance",
+    "PD": "Presence Detectors",
+    "MSL": "Motion sensor lights with Auto brightness adjustment",
+    "MS": "Motion-Sensor",
+    "SP": "Smart Plugs with energy monitor",
+    "HB": "Heart-Beat-Monitor",
+    "DB": "Smart-Door-Bell",
+    "AQI": "Air-Quality-Monitor"
+}
+
 def load_config():
     # Look for config.json in the config directory relative to the script's new location
     config_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../config/config.json'))
@@ -107,19 +119,38 @@ def deploy_flow(filepath, config):
         print("Error: Invalid flow file format. Expected a JSON array.")
         return
 
-    # Extract flow name from filename or tab label
+    # Profile-Based Derivation
     flow_filename = os.path.basename(filepath)
-    default_device_name = flow_filename.replace('_flow.json', '').replace('.json', '')
-    device_name = config.get('thingsboard', {}).get('device_name', default_device_name)
+    # Standard format: PiltiSmart-<Acronym>-Probe.json
+    if flow_filename.startswith("PiltiSmart-") and flow_filename.endswith(".json"):
+        derived_profile = flow_filename.replace(".json", "")
+        # Derive device acronym (e.g. SAT from PiltiSmart-SAT-Probe)
+        parts = derived_profile.split("-")
+        if len(parts) >= 2:
+            derived_device = parts[1]
+        else:
+            derived_device = derived_profile
+    else:
+        derived_profile = flow_filename.replace('_flow.json', '').replace('.json', '')
+        derived_device = derived_profile
+
+    device_name = config.get('thingsboard', {}).get('device_name')
+    if not device_name:
+        # Check if derived acronym has a mapping
+        device_name = ACRONYM_MAP.get(derived_device, derived_device)
+        
+    profile_name = config.get('thingsboard', {}).get('profile_name', derived_profile)
     
-    print(f"Processing flow: {device_name}")
+    print(f"Deploying flow file: {os.path.abspath(filepath)}")
+    print(f"Target Device: {device_name}")
 
     # ThingsBoard Workflow
     token = tb_login(config)
     if not token:
         return
 
-    device_type = config.get('thingsboard', {}).get('profile_name', 'default') if config.get('thingsboard', {}).get('new_profile', 'no').lower() == 'yes' else 'default'
+    # Derive device type from profile name (defaulting to profile name if new_profile mode is active)
+    device_type = profile_name if config.get('thingsboard', {}).get('new_profile', 'no').lower() == 'yes' else 'default'
     device_id = tb_get_or_create_device(token, config, device_name, device_type)
     if not device_id:
         return
@@ -183,7 +214,10 @@ def deploy_flow(filepath, config):
     tab_node = flow_data[0]
     nodes = flow_data[1:]
     
-    target_label = tab_node.get("label", "Imported Flow")
+    # Enforce standardized profile name as the tab label
+    target_label = profile_name
+    tab_node["label"] = profile_name
+    
     newflow = config.get('nodered', {}).get('newflow', 'yes').lower() == 'yes'
     node_red_url = config['nodered']['url']
     

@@ -1,36 +1,39 @@
 [
     {
-        "id": "76aa19e49fea3eca",
+        "id": "pd_tab_1",
         "type": "tab",
-        "label": "Smart Door Bell-Flow"
+        "label": "PiltiSmart-PD-Probe",
+        "disabled": false,
+        "info": "",
+        "env": []
     },
     {
-        "id": "89e2511f0cf24241",
+        "id": "pd_mqtt_in_1",
         "type": "mqtt in",
-        "z": "76aa19e49fea3eca",
-        "name": "(Attribute)Smart-Door-Bell",
+        "z": "pd_tab_1",
+        "name": "(Attribute)Presence-Detectors",
         "topic": "v1/devices/me/attributes",
         "qos": "2",
         "datatype": "auto-detect",
-        "broker": "sdb_broker_1",
+        "broker": "pd_broker_1",
         "nl": false,
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 120,
+        "x": 160,
         "y": 120,
         "wires": [
             [
-                "1a6985f4e2d84127",
-                "5848fd1eae9c4e7a"
+                "pd_debug_1",
+                "pd_limit_1"
             ]
         ]
     },
     {
-        "id": "1a6985f4e2d84127",
+        "id": "pd_debug_1",
         "type": "debug",
-        "z": "76aa19e49fea3eca",
-        "name": "debug Smart-Door-Bell 1",
+        "z": "pd_tab_1",
+        "name": "debug Presence-Detectors 1",
         "active": true,
         "tosidebar": true,
         "console": false,
@@ -38,15 +41,15 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 350,
+        "x": 400,
         "y": 420,
         "wires": []
     },
     {
-        "id": "230515bedb064d8f",
+        "id": "pd_debug_2",
         "type": "debug",
-        "z": "76aa19e49fea3eca",
-        "name": "debug Smart-Door-Bell 2",
+        "z": "pd_tab_1",
+        "name": "debug Presence-Detectors 2",
         "active": true,
         "tosidebar": true,
         "console": false,
@@ -54,14 +57,14 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 710,
+        "x": 760,
         "y": 420,
         "wires": []
     },
     {
-        "id": "5848fd1eae9c4e7a",
+        "id": "pd_limit_1",
         "type": "function",
-        "z": "76aa19e49fea3eca",
+        "z": "pd_tab_1",
         "name": "dataIntravelLimit",
         "func": "let out ={};\nif (msg.payload.dataIntravel < 10) \n{ msg.payload.dataIntravel = 10}\n\nout.delay = (msg.payload.dataIntravel)*1000\n\nreturn out;",
         "outputs": 1,
@@ -74,14 +77,14 @@
         "y": 120,
         "wires": [
             [
-                "0d9245b3ddf949e1"
+                "pd_controller_1"
             ]
         ]
     },
     {
-        "id": "0d9245b3ddf949e1",
+        "id": "pd_controller_1",
         "type": "trigger",
-        "z": "76aa19e49fea3eca",
+        "z": "pd_tab_1",
         "name": "dataIntravelContoller",
         "op1": "1",
         "op2": "0",
@@ -99,36 +102,36 @@
         "y": 200,
         "wires": [
             [
-                "96692435dd3d443b",
-                "90345c7876954e85"
+                "pd_metrics_1",
+                "pd_battery_1"
             ]
         ]
     },
     {
-        "id": "96692435dd3d443b",
+        "id": "pd_metrics_1",
         "type": "function",
-        "z": "76aa19e49fea3eca",
-        "name": "SmartDoorBellMetrics",
-        "func": "// Helper function to generate random number in a range\nfunction randomInt(min, max) {\n    return Math.floor(Math.random() * (max - min + 1)) + min;\n}\n\n// Build telemetry for this device\nlet out = {\n    ring_count_numeric: randomInt(0, 5) > 4 ? 1 : 0,\n    motion_detected_numeric: Math.random() > 0.7 ? 1 : 0,\n    signal_strength_numeric: randomInt(-85, -40),\n    camera_status_numeric: Math.random() > 0.1 ? 1 : 0,\n    temperature_numeric: randomInt(15, 35)\n};\n\n// Add formatted string values\nout.ring_count = out.ring_count_numeric + \" rings\";\nout.motion_detected = out.motion_detected_numeric === 1 ? \"Motion Detected\" : \"Clear\";\nout.signal_strength = out.signal_strength_numeric + \" dBm\";\nout.camera_status = out.camera_status_numeric === 1 ? \"Online\" : \"Offline\";\nout.temperature = out.temperature_numeric + \" °C\";\n\n// Set the new output in msg.payload\nmsg.payload = out;\n\n// Return updated message\nreturn msg;\n",
+        "z": "pd_tab_1",
+        "name": "PresenceDetectorMetrics",
+        "func": "// Helper function to generate random integer in a range\nfunction randomInt(min, max) {\n    return Math.floor(Math.random() * (max - min + 1)) + min;\n}\n\n// Build telemetry tailored for Presence Detectors (e.g. mmWave sensor)\nlet out = {\n    presence_detected_numeric: Math.random() > 0.3 ? 1 : 0, // Tends to be higher probability for mmWave\n};\n\n// If presence is detected, set a realistic distance, otherwise 0\nout.target_distance_m_numeric = out.presence_detected_numeric === 1 ? parseFloat((Math.random() * 5).toFixed(2)) : 0.0;\nout.illuminance_lux_numeric = randomInt(5, 500);\n\n// Add formatted string values\nout.presence_detected = out.presence_detected_numeric === 1 ? \"Present\" : \"Clear\";\nout.target_distance_m = out.target_distance_m_numeric + \" m\";\nout.illuminance_lux = out.illuminance_lux_numeric + \" lux\";\n\n// Set the new output in msg.payload\nmsg.payload = out;\n\n// Return updated message\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 520,
+        "x": 560,
         "y": 320,
         "wires": [
             [
-                "230515bedb064d8f",
-                "fc2de9f2a983453a"
+                "pd_debug_2",
+                "pd_telemetry_out_1"
             ]
         ]
     },
     {
-        "id": "a530ae1fb6d546ca",
+        "id": "pd_restart_1",
         "type": "inject",
-        "z": "76aa19e49fea3eca",
+        "z": "pd_tab_1",
         "name": "Restart Device",
         "props": [
             {
@@ -146,15 +149,15 @@
         "y": 60,
         "wires": [
             [
-                "5848fd1eae9c4e7a"
+                "pd_limit_1"
             ]
         ]
     },
     {
-        "id": "fc2de9f2a983453a",
+        "id": "pd_telemetry_out_1",
         "type": "mqtt out",
-        "z": "76aa19e49fea3eca",
-        "name": "(Telemetry)Smart-Door-Bell",
+        "z": "pd_tab_1",
+        "name": "(Telemetry)Presence-Detectors",
         "topic": "v1/devices/me/telemetry",
         "qos": "",
         "retain": "",
@@ -163,15 +166,15 @@
         "userProps": "",
         "correl": "",
         "expiry": "",
-        "broker": "sdb_broker_1",
-        "x": 730,
+        "broker": "pd_broker_1",
+        "x": 810,
         "y": 180,
         "wires": []
     },
     {
-        "id": "90345c7876954e85",
+        "id": "pd_battery_1",
         "type": "function",
-        "z": "76aa19e49fea3eca",
+        "z": "pd_tab_1",
         "name": "BatteryMetrics",
         "func": "// Helper function to generate random number in a range\nfunction randomInt(min, max) {\n    return Math.floor(Math.random() * (max - min + 1)) + min;\n}\n\n// Get or initialize battery state \nlet batteryLevel = flow.get('batteryLevel') || randomInt(50, 100); \nlet isCharging = flow.get('isCharging') || false;\n\n// Simulate battery cycle\nif (isCharging) {\n    batteryLevel += randomInt(1, 3);\n    if (batteryLevel >= 100) {\n        batteryLevel = 100;\n        isCharging = false;\n    }\n} else {\n    batteryLevel -= randomInt(1, 2);\n    if (batteryLevel <= 15) {\n        isCharging = true;\n    }\n}\n\n// Determine battery status\nlet batteryStatus = \"Normal\";\nif (batteryLevel <= 20) {\n    batteryStatus = \"Low\";\n} else if (batteryLevel >= 95 && isCharging) {\n    batteryStatus = \"Full\";\n}\n\n// Save state for next run\nflow.set('batteryLevel', batteryLevel);\nflow.set('isCharging', isCharging);\n\n// Build attribute payload\nmsg.payload = {\n    batteryLevel: batteryLevel,\n    batteryStatus: batteryStatus,\n    batteryChargingStatus: isCharging ? \"Charging\" : \"Not Charging\"\n};\n\nreturn msg;",
         "outputs": 1,
@@ -180,19 +183,19 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 520,
+        "x": 560,
         "y": 420,
         "wires": [
             [
-                "18f95f14e6c64366"
+                "pd_attributes_out_1"
             ]
         ]
     },
     {
-        "id": "18f95f14e6c64366",
+        "id": "pd_attributes_out_1",
         "type": "mqtt out",
-        "z": "76aa19e49fea3eca",
-        "name": "(Attributes)Smart-Door-Bell",
+        "z": "pd_tab_1",
+        "name": "(Attributes)Presence-Detectors",
         "topic": "v1/devices/me/attributes",
         "qos": "",
         "retain": "",
@@ -201,15 +204,15 @@
         "userProps": "",
         "correl": "",
         "expiry": "",
-        "broker": "sdb_broker_1",
-        "x": 920,
+        "broker": "pd_broker_1",
+        "x": 910,
         "y": 360,
         "wires": []
     },
     {
-        "id": "sdb_broker_1",
+        "id": "pd_broker_1",
         "type": "mqtt-broker",
-        "name": "Smart-Door-Bell-Broker",
+        "name": "Presence-Detectors-Broker",
         "broker": "mqtt-tb-sit.piltismart.org",
         "port": "1883",
         "clientid": "",

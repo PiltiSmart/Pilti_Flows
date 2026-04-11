@@ -1,16 +1,24 @@
 import json
 import os
 
+# Load config to get device_name and derive profile_name (Option B)
+config_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../config/config.json"))
+with open(config_path, 'r') as f:
+    config = json.load(f)
+device_name = config['thingsboard'].get('device_name', 'SAT')
+profile_name = f"PiltiSmart-{device_name}-Probe"
+
 # Use absolute path relative to script location for templates and deployed flows
 template_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../flows/templates/Motion_Sensor_flow.json"))
-output_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../flows/smart_office/Smart_attendence_tracker_flow.json"))
+output_path = os.path.abspath(os.path.join(os.path.dirname(__file__), f"../../flows/smart_office/{profile_name}.json"))
 
 with open(template_path, 'r') as f:
     flow = json.load(f)
 
 for node in flow:
     if node.get("type") == "tab":
-        node["label"] = "Smart Attendance Tracker-Flow"
+        node["label"] = profile_name
+        continue
     
     # Replace names containing 'Motion-Sensor' or 'MotionSensor'
     if "name" in node and isinstance(node["name"], str):

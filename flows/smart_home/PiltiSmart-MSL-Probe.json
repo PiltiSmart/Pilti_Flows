@@ -1,39 +1,39 @@
 [
     {
-        "id": "56acc5a1376f5cb0",
+        "id": "msl_tab_1",
         "type": "tab",
-        "label": "Heart-Beat-Server",
+        "label": "PiltiSmart-MSL-Probe",
         "disabled": false,
         "info": "",
         "env": []
     },
     {
-        "id": "7a462a2d23345e6e",
+        "id": "msl_mqtt_in_1",
         "type": "mqtt in",
-        "z": "56acc5a1376f5cb0",
-        "name": "(Attribute)Heart-Beat-Server",
+        "z": "msl_tab_1",
+        "name": "(Attribute)Motion-Sensor-Lights-With-Auto-Brightness-Adjustment",
         "topic": "v1/devices/me/attributes",
         "qos": "2",
         "datatype": "auto-detect",
-        "broker": "455b4a859f714887",
+        "broker": "msl_broker_1",
         "nl": false,
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 120,
+        "x": 160,
         "y": 120,
         "wires": [
             [
-                "525687d93e5c68b0",
-                "2c81ec71a63ca83c"
+                "msl_debug_1",
+                "msl_limit_1"
             ]
         ]
     },
     {
-        "id": "525687d93e5c68b0",
+        "id": "msl_debug_1",
         "type": "debug",
-        "z": "56acc5a1376f5cb0",
-        "name": "debug 361",
+        "z": "msl_tab_1",
+        "name": "debug Motion-Sensor-Lights-With-Auto-Brightness-Adjustment 1",
         "active": true,
         "tosidebar": true,
         "console": false,
@@ -41,15 +41,15 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 290,
-        "y": 440,
+        "x": 400,
+        "y": 420,
         "wires": []
     },
     {
-        "id": "9b8df32d2f46fe1d",
+        "id": "msl_debug_2",
         "type": "debug",
-        "z": "56acc5a1376f5cb0",
-        "name": "debug 362",
+        "z": "msl_tab_1",
+        "name": "debug Motion-Sensor-Lights-With-Auto-Brightness-Adjustment 2",
         "active": true,
         "tosidebar": true,
         "console": false,
@@ -57,16 +57,16 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 650,
-        "y": 540,
+        "x": 760,
+        "y": 420,
         "wires": []
     },
     {
-        "id": "2c81ec71a63ca83c",
+        "id": "msl_limit_1",
         "type": "function",
-        "z": "56acc5a1376f5cb0",
+        "z": "msl_tab_1",
         "name": "dataIntravelLimit",
-        "func": "let out ={}\nif (msg.payload.dataIntravel < 10) \n{ msg.payload.dataIntravel = 10}\n\nout.delay = (msg.payload.dataIntravel)*1000\n\nreturn out;",
+        "func": "let out ={};\nif (msg.payload.dataIntravel < 10) \n{ msg.payload.dataIntravel = 10}\n\nout.delay = (msg.payload.dataIntravel)*1000\n\nreturn out;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -77,14 +77,14 @@
         "y": 120,
         "wires": [
             [
-                "add0dd999e2b4bb0"
+                "msl_controller_1"
             ]
         ]
     },
     {
-        "id": "add0dd999e2b4bb0",
+        "id": "msl_controller_1",
         "type": "trigger",
-        "z": "56acc5a1376f5cb0",
+        "z": "msl_tab_1",
         "name": "dataIntravelContoller",
         "op1": "1",
         "op2": "0",
@@ -102,36 +102,36 @@
         "y": 200,
         "wires": [
             [
-                "eb29c60c374cda9e",
-                "47aa59f4fa85eade"
+                "msl_metrics_1",
+                "msl_battery_1"
             ]
         ]
     },
     {
-        "id": "eb29c60c374cda9e",
+        "id": "msl_metrics_1",
         "type": "function",
-        "z": "56acc5a1376f5cb0",
-        "name": "HeartBeatMetrics",
-        "func": "// Helper function to generate random number in a range\nfunction randomInt(min, max) {\n    return Math.floor(Math.random() * (max - min + 1)) + min;\n}\n\n// Build telemetry for this device\nlet out = {\n    bpm_numeric: randomInt(60, 100),\n    blood_pressure_systolic_numeric: randomInt(110, 130),\n    blood_pressure_diastolic_numeric: randomInt(70, 85),\n    oxygen_saturation_percent_numeric: randomInt(95, 100)\n};\n\nout.bpm = out.bpm_numeric + \" bpm\";\nout.blood_pressure_systolic = out.blood_pressure_systolic_numeric + \" mmHg\";\nout.blood_pressure_diastolic = out.blood_pressure_diastolic_numeric + \" mmHg\";\nout.oxygen_saturation_percent = out.oxygen_saturation_percent_numeric + \"%\";\n\n// Set the new output in msg.payload\nmsg.payload = out;\n\n// Return updated message\nreturn msg;\n",
+        "z": "msl_tab_1",
+        "name": "MotionSensorLightMetrics",
+        "func": "// Helper function to generate random integer\nfunction randomInt(min, max) {\n    return Math.floor(Math.random() * (max - min + 1)) + min;\n}\n\n// Build telemetry tailored for Motion sensor lights\nlet motion = Math.random() > 0.7 ? 1 : 0;\nlet ambient = randomInt(5, 800);\nlet state = 0;\nlet brightness = 0;\n\n// Auto brightness logic\nif (motion === 1) {\n    state = 1;\n    if (ambient < 50) brightness = 100;\n    else if (ambient < 200) brightness = 75;\n    else if (ambient < 500) brightness = 50;\n    else brightness = 10;\n}\n\nlet out = {\n    motion_detected_numeric: motion,\n    light_state_numeric: state,\n    ambient_light_lux_numeric: ambient,\n    brightness_percent_numeric: brightness,\n};\n\n// Add formatted string values\nout.motion_detected = motion === 1 ? \"Detected\" : \"Clear\";\nout.light_state = state === 1 ? \"ON\" : \"OFF\";\nout.ambient_light_lux = ambient + \" lux\";\nout.brightness_percent = brightness + \" %\";\n\n// Set the new output in msg.payload\nmsg.payload = out;\n\n// Return updated message\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 520,
+        "x": 560,
         "y": 320,
         "wires": [
             [
-                "9b8df32d2f46fe1d",
-                "5a97535a7216a260"
+                "msl_debug_2",
+                "msl_telemetry_out_1"
             ]
         ]
     },
     {
-        "id": "88904a38cba61777",
+        "id": "msl_restart_1",
         "type": "inject",
-        "z": "56acc5a1376f5cb0",
+        "z": "msl_tab_1",
         "name": "Restart Device",
         "props": [
             {
@@ -149,15 +149,15 @@
         "y": 60,
         "wires": [
             [
-                "2c81ec71a63ca83c"
+                "msl_limit_1"
             ]
         ]
     },
     {
-        "id": "5a97535a7216a260",
+        "id": "msl_telemetry_out_1",
         "type": "mqtt out",
-        "z": "56acc5a1376f5cb0",
-        "name": "(Telemetry)Heart-Beat-Server",
+        "z": "msl_tab_1",
+        "name": "(Telemetry)Motion-Sensor-Lights-With-Auto-Brightness-Adjustment",
         "topic": "v1/devices/me/telemetry",
         "qos": "",
         "retain": "",
@@ -166,15 +166,15 @@
         "userProps": "",
         "correl": "",
         "expiry": "",
-        "broker": "455b4a859f714887",
-        "x": 730,
+        "broker": "msl_broker_1",
+        "x": 810,
         "y": 180,
         "wires": []
     },
     {
-        "id": "47aa59f4fa85eade",
+        "id": "msl_battery_1",
         "type": "function",
-        "z": "56acc5a1376f5cb0",
+        "z": "msl_tab_1",
         "name": "BatteryMetrics",
         "func": "// Helper function to generate random number in a range\nfunction randomInt(min, max) {\n    return Math.floor(Math.random() * (max - min + 1)) + min;\n}\n\n// Get or initialize battery state \nlet batteryLevel = flow.get('batteryLevel') || randomInt(50, 100); \nlet isCharging = flow.get('isCharging') || false;\n\n// Simulate battery cycle\nif (isCharging) {\n    batteryLevel += randomInt(1, 3);\n    if (batteryLevel >= 100) {\n        batteryLevel = 100;\n        isCharging = false;\n    }\n} else {\n    batteryLevel -= randomInt(1, 2);\n    if (batteryLevel <= 15) {\n        isCharging = true;\n    }\n}\n\n// Determine battery status\nlet batteryStatus = \"Normal\";\nif (batteryLevel <= 20) {\n    batteryStatus = \"Low\";\n} else if (batteryLevel >= 95 && isCharging) {\n    batteryStatus = \"Full\";\n}\n\n// Save state for next run\nflow.set('batteryLevel', batteryLevel);\nflow.set('isCharging', isCharging);\n\n// Build attribute payload\nmsg.payload = {\n    batteryLevel: batteryLevel,\n    batteryStatus: batteryStatus,\n    batteryChargingStatus: isCharging ? \"Charging\" : \"Not Charging\"\n};\n\nreturn msg;",
         "outputs": 1,
@@ -183,19 +183,19 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 520,
+        "x": 560,
         "y": 420,
         "wires": [
             [
-                "741276a811487034"
+                "msl_attributes_out_1"
             ]
         ]
     },
     {
-        "id": "741276a811487034",
+        "id": "msl_attributes_out_1",
         "type": "mqtt out",
-        "z": "56acc5a1376f5cb0",
-        "name": "(Attributes)Heart-Beat-Server",
+        "z": "msl_tab_1",
+        "name": "(Attributes)Motion-Sensor-Lights-With-Auto-Brightness-Adjustment",
         "topic": "v1/devices/me/attributes",
         "qos": "",
         "retain": "",
@@ -204,15 +204,15 @@
         "userProps": "",
         "correl": "",
         "expiry": "",
-        "broker": "455b4a859f714887",
-        "x": 820,
-        "y": 420,
+        "broker": "msl_broker_1",
+        "x": 910,
+        "y": 360,
         "wires": []
     },
     {
-        "id": "455b4a859f714887",
+        "id": "msl_broker_1",
         "type": "mqtt-broker",
-        "name": "Heart-Beat-Monitor",
+        "name": "Motion-Sensor-Lights-With-Auto-Brightness-Adjustment-Broker",
         "broker": "mqtt-tb-sit.piltismart.org",
         "port": "1883",
         "clientid": "",

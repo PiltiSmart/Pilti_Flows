@@ -1,39 +1,39 @@
 [
     {
-        "id": "sp_tab_1",
+        "id": "56acc5a1376f5cb0",
         "type": "tab",
-        "label": "Smart Plugs with energy monitor-Flow",
+        "label": "PiltiSmart-HB-Probe",
         "disabled": false,
         "info": "",
         "env": []
     },
     {
-        "id": "sp_mqtt_in_1",
+        "id": "7a462a2d23345e6e",
         "type": "mqtt in",
-        "z": "sp_tab_1",
-        "name": "(Attribute)Smart-Plugs-With-Energy-Monitor",
+        "z": "56acc5a1376f5cb0",
+        "name": "(Attribute)Heart-Beat-Server",
         "topic": "v1/devices/me/attributes",
         "qos": "2",
         "datatype": "auto-detect",
-        "broker": "sp_broker_1",
+        "broker": "455b4a859f714887",
         "nl": false,
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 160,
+        "x": 120,
         "y": 120,
         "wires": [
             [
-                "sp_debug_1",
-                "sp_limit_1"
+                "525687d93e5c68b0",
+                "2c81ec71a63ca83c"
             ]
         ]
     },
     {
-        "id": "sp_debug_1",
+        "id": "525687d93e5c68b0",
         "type": "debug",
-        "z": "sp_tab_1",
-        "name": "debug Smart-Plugs-With-Energy-Monitor 1",
+        "z": "56acc5a1376f5cb0",
+        "name": "debug 361",
         "active": true,
         "tosidebar": true,
         "console": false,
@@ -41,15 +41,15 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 400,
-        "y": 420,
+        "x": 290,
+        "y": 440,
         "wires": []
     },
     {
-        "id": "sp_debug_2",
+        "id": "9b8df32d2f46fe1d",
         "type": "debug",
-        "z": "sp_tab_1",
-        "name": "debug Smart-Plugs-With-Energy-Monitor 2",
+        "z": "56acc5a1376f5cb0",
+        "name": "debug 362",
         "active": true,
         "tosidebar": true,
         "console": false,
@@ -57,16 +57,16 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 760,
-        "y": 420,
+        "x": 650,
+        "y": 540,
         "wires": []
     },
     {
-        "id": "sp_limit_1",
+        "id": "2c81ec71a63ca83c",
         "type": "function",
-        "z": "sp_tab_1",
+        "z": "56acc5a1376f5cb0",
         "name": "dataIntravelLimit",
-        "func": "let out ={};\nif (msg.payload.dataIntravel < 10) \n{ msg.payload.dataIntravel = 10}\n\nout.delay = (msg.payload.dataIntravel)*1000\n\nreturn out;",
+        "func": "let out ={}\nif (msg.payload.dataIntravel < 10) \n{ msg.payload.dataIntravel = 10}\n\nout.delay = (msg.payload.dataIntravel)*1000\n\nreturn out;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -77,14 +77,14 @@
         "y": 120,
         "wires": [
             [
-                "sp_controller_1"
+                "add0dd999e2b4bb0"
             ]
         ]
     },
     {
-        "id": "sp_controller_1",
+        "id": "add0dd999e2b4bb0",
         "type": "trigger",
-        "z": "sp_tab_1",
+        "z": "56acc5a1376f5cb0",
         "name": "dataIntravelContoller",
         "op1": "1",
         "op2": "0",
@@ -102,36 +102,36 @@
         "y": 200,
         "wires": [
             [
-                "sp_metrics_1",
-                "sp_battery_1"
+                "eb29c60c374cda9e",
+                "47aa59f4fa85eade"
             ]
         ]
     },
     {
-        "id": "sp_metrics_1",
+        "id": "eb29c60c374cda9e",
         "type": "function",
-        "z": "sp_tab_1",
-        "name": "SmartPlugMetrics",
-        "func": "// Helper function to generate random number\nfunction randomFloat(min, max) {\n    return (Math.random() * (max - min) + min).toFixed(2);\n}\n\n// Build telemetry for this device\nlet out = {\n    state_numeric: Math.random() > 0.5 ? 1 : 0,\n    voltage_volts_numeric: parseFloat(randomFloat(220, 240)),\n};\n\nout.current_amps_numeric = out.state_numeric === 1 ? parseFloat(randomFloat(1.0, 5.0)) : 0.0;\nout.power_watts_numeric = parseFloat((out.voltage_volts_numeric * out.current_amps_numeric).toFixed(2));\nout.energy_consumed_kwh_numeric = parseFloat(((flow.get('energy_kwh') || 0) + (out.power_watts_numeric / 3600)).toFixed(4));\nflow.set('energy_kwh', out.energy_consumed_kwh_numeric);\n\n// Add formatted string values\nout.state = out.state_numeric === 1 ? \"ON\" : \"OFF\";\nout.current_amps = out.current_amps_numeric + \" A\";\nout.voltage_volts = out.voltage_volts_numeric + \" V\";\nout.power_watts = out.power_watts_numeric + \" W\";\nout.energy_consumed_kwh = out.energy_consumed_kwh_numeric + \" kWh\";\n\n// Set the new output in msg.payload\nmsg.payload = out;\n\n// Return updated message\nreturn msg;",
+        "z": "56acc5a1376f5cb0",
+        "name": "HeartBeatMetrics",
+        "func": "// Helper function to generate random number in a range\nfunction randomInt(min, max) {\n    return Math.floor(Math.random() * (max - min + 1)) + min;\n}\n\n// Build telemetry for this device\nlet out = {\n    bpm_numeric: randomInt(60, 100),\n    blood_pressure_systolic_numeric: randomInt(110, 130),\n    blood_pressure_diastolic_numeric: randomInt(70, 85),\n    oxygen_saturation_percent_numeric: randomInt(95, 100)\n};\n\nout.bpm = out.bpm_numeric + \" bpm\";\nout.blood_pressure_systolic = out.blood_pressure_systolic_numeric + \" mmHg\";\nout.blood_pressure_diastolic = out.blood_pressure_diastolic_numeric + \" mmHg\";\nout.oxygen_saturation_percent = out.oxygen_saturation_percent_numeric + \"%\";\n\n// Set the new output in msg.payload\nmsg.payload = out;\n\n// Return updated message\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 560,
+        "x": 520,
         "y": 320,
         "wires": [
             [
-                "sp_debug_2",
-                "sp_telemetry_out_1"
+                "9b8df32d2f46fe1d",
+                "5a97535a7216a260"
             ]
         ]
     },
     {
-        "id": "sp_restart_1",
+        "id": "88904a38cba61777",
         "type": "inject",
-        "z": "sp_tab_1",
+        "z": "56acc5a1376f5cb0",
         "name": "Restart Device",
         "props": [
             {
@@ -149,15 +149,15 @@
         "y": 60,
         "wires": [
             [
-                "sp_limit_1"
+                "2c81ec71a63ca83c"
             ]
         ]
     },
     {
-        "id": "sp_telemetry_out_1",
+        "id": "5a97535a7216a260",
         "type": "mqtt out",
-        "z": "sp_tab_1",
-        "name": "(Telemetry)Smart-Plugs-With-Energy-Monitor",
+        "z": "56acc5a1376f5cb0",
+        "name": "(Telemetry)Heart-Beat-Server",
         "topic": "v1/devices/me/telemetry",
         "qos": "",
         "retain": "",
@@ -166,15 +166,15 @@
         "userProps": "",
         "correl": "",
         "expiry": "",
-        "broker": "sp_broker_1",
-        "x": 810,
+        "broker": "455b4a859f714887",
+        "x": 730,
         "y": 180,
         "wires": []
     },
     {
-        "id": "sp_battery_1",
+        "id": "47aa59f4fa85eade",
         "type": "function",
-        "z": "sp_tab_1",
+        "z": "56acc5a1376f5cb0",
         "name": "BatteryMetrics",
         "func": "// Helper function to generate random number in a range\nfunction randomInt(min, max) {\n    return Math.floor(Math.random() * (max - min + 1)) + min;\n}\n\n// Get or initialize battery state \nlet batteryLevel = flow.get('batteryLevel') || randomInt(50, 100); \nlet isCharging = flow.get('isCharging') || false;\n\n// Simulate battery cycle\nif (isCharging) {\n    batteryLevel += randomInt(1, 3);\n    if (batteryLevel >= 100) {\n        batteryLevel = 100;\n        isCharging = false;\n    }\n} else {\n    batteryLevel -= randomInt(1, 2);\n    if (batteryLevel <= 15) {\n        isCharging = true;\n    }\n}\n\n// Determine battery status\nlet batteryStatus = \"Normal\";\nif (batteryLevel <= 20) {\n    batteryStatus = \"Low\";\n} else if (batteryLevel >= 95 && isCharging) {\n    batteryStatus = \"Full\";\n}\n\n// Save state for next run\nflow.set('batteryLevel', batteryLevel);\nflow.set('isCharging', isCharging);\n\n// Build attribute payload\nmsg.payload = {\n    batteryLevel: batteryLevel,\n    batteryStatus: batteryStatus,\n    batteryChargingStatus: isCharging ? \"Charging\" : \"Not Charging\"\n};\n\nreturn msg;",
         "outputs": 1,
@@ -183,19 +183,19 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 560,
+        "x": 520,
         "y": 420,
         "wires": [
             [
-                "sp_attributes_out_1"
+                "741276a811487034"
             ]
         ]
     },
     {
-        "id": "sp_attributes_out_1",
+        "id": "741276a811487034",
         "type": "mqtt out",
-        "z": "sp_tab_1",
-        "name": "(Attributes)Smart-Plugs-With-Energy-Monitor",
+        "z": "56acc5a1376f5cb0",
+        "name": "(Attributes)Heart-Beat-Server",
         "topic": "v1/devices/me/attributes",
         "qos": "",
         "retain": "",
@@ -204,15 +204,15 @@
         "userProps": "",
         "correl": "",
         "expiry": "",
-        "broker": "sp_broker_1",
-        "x": 910,
-        "y": 360,
+        "broker": "455b4a859f714887",
+        "x": 820,
+        "y": 420,
         "wires": []
     },
     {
-        "id": "sp_broker_1",
+        "id": "455b4a859f714887",
         "type": "mqtt-broker",
-        "name": "Smart-Plugs-With-Energy-Monitor-Broker",
+        "name": "Heart-Beat-Monitor",
         "broker": "mqtt-tb-sit.piltismart.org",
         "port": "1883",
         "clientid": "",
