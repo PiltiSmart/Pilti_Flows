@@ -1,11 +1,21 @@
 [
     {
-        "id": "msl_tab_1",
+        "id": "ms_tab_1",
         "type": "tab",
         "label": "PiltiSmart-MSL-Probe",
         "disabled": false,
         "info": "",
         "env": []
+    },
+    {
+        "id": "msl_comment_01",
+        "type": "comment",
+        "z": "msl_tab_1",
+        "name": "Flow Description & Expansion",
+        "info": "### PiltiSmart Motion Sensor Lights\n    \n**Industry Status**: Smart Home / Interior Design.\n\n**Description**: \nIntelligent lighting system that combines motion sensitivity with ambient light thresholds (Lux).\n\n**Telemetry Metrics**:\n- `lux`\n- `light_status`\n- `motion`\n\n**Lifecycle Overview**:\n1. **Dual-Sensing**: Combines movement detection with lux levels.\n2. **Efficiency Logic**: Prevents lights from turning on in daylight.\n3. **State Management**: Automated time-to-off countdowns.\n4. **Analytics**: Tracks lighting usage and energy savings.",
+        "x": 160,
+        "y": 20,
+        "wires": []
     },
     {
         "id": "msl_mqtt_in_1",

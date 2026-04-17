@@ -6,6 +6,11 @@ import urllib.error
 import urllib.parse
 import ssl
 import os
+import uuid
+
+# Add tools directory to path to import metadata_registry
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from metadata_registry import generate_markdown
 
 # Bypass SSL verification for macOS Python which may lack local certificates
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -134,12 +139,15 @@ def deploy_flow(filepath, config):
         derived_profile = flow_filename.replace('_flow.json', '').replace('.json', '')
         derived_device = derived_profile
 
-    device_name = config.get('thingsboard', {}).get('device_name')
-    if not device_name:
-        # Check if derived acronym has a mapping
-        device_name = ACRONYM_MAP.get(derived_device, derived_device)
-        
-    profile_name = config.get('thingsboard', {}).get('profile_name', derived_profile)
+    # Always use derived values if we are deploying a specific file that matches our pattern
+    # Otherwise fallback to config.json
+    device_name = ACRONYM_MAP.get(derived_device, derived_device)
+    profile_name = derived_profile
+    
+    # If the file didn't follow the pattern, then fallback to config
+    if derived_device == derived_profile and derived_device == flow_filename:
+         device_name = config.get('thingsboard', {}).get('device_name', device_name)
+         profile_name = config.get('thingsboard', {}).get('profile_name', profile_name)
     
     print(f"Deploying flow file: {os.path.abspath(filepath)}")
     print(f"Target Device: {device_name}")
@@ -250,6 +258,27 @@ def deploy_flow(filepath, config):
             for node in nodes:
                 if node.get("z") == random_tab_id:
                     node["z"] = existing_tab_id
+
+    # Check for comment node to ensure info is correct (backfill if missing in deployment too)
+    comment_found = False
+    for node in nodes:
+        if node.get('type') == 'comment' and node.get('name') == "Flow Description & Expansion":
+            node['info'] = generate_markdown(derived_device)
+            comment_found = True
+            break
+    
+    if not comment_found:
+        new_comment = {
+            "id": uuid.uuid4().hex[:16],
+            "type": "comment",
+            "z": tab_node.get("id"),
+            "name": "Flow Description & Expansion",
+            "info": generate_markdown(derived_device),
+            "x": 160,
+            "y": 20,
+            "wires": []
+        }
+        nodes.insert(0, new_comment)
 
     payload = {
         "id": tab_node.get("id"),

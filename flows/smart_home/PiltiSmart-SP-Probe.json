@@ -1,11 +1,21 @@
 [
     {
-        "id": "sp_tab_1",
+        "id": "ms_tab_1",
         "type": "tab",
         "label": "PiltiSmart-SP-Probe",
         "disabled": false,
         "info": "",
         "env": []
+    },
+    {
+        "id": "sp_comment_01",
+        "type": "comment",
+        "z": "sp_tab_1",
+        "name": "Flow Description & Expansion",
+        "info": "### PiltiSmart Smart Plug\n    \n**Industry Status**: Smart Home / Energy Management.\n\n**Description**: \nSmart socket control and real-time energy monitoring system for domestic and small-office appliances.\n\n**Telemetry Metrics**:\n- `power`\n- `current`\n- `voltage`\n- `energy`\n\n**Lifecycle Overview**:\n1. **Energy Monitoring**: Real-time telemetry of load and consumption.\n2. **Relay Control**: Supports remote on/off triggers via MQTT.\n3. **Safety Logic**: Overload protection and surge monitoring.\n4. **Cost Analysis**: Aggregated data for energy usage reporting.",
+        "x": 160,
+        "y": 20,
+        "wires": []
     },
     {
         "id": "sp_mqtt_in_1",

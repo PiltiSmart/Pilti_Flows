@@ -1,11 +1,21 @@
 [
     {
-        "id": "pd_tab_1",
+        "id": "ms_tab_1",
         "type": "tab",
         "label": "PiltiSmart-PD-Probe",
         "disabled": false,
         "info": "",
         "env": []
+    },
+    {
+        "id": "pd_comment_01",
+        "type": "comment",
+        "z": "pd_tab_1",
+        "name": "Flow Description & Expansion",
+        "info": "### PiltiSmart Presence Detector\n    \n**Industry Status**: Smart Office / Building Automation.\n\n**Description**: \nNon-intrusive occupancy detection system using mmWave radar to distinguish between static and moving presence.\n\n**Telemetry Metrics**:\n- `is_present`\n- `static_state`\n- `moving_state`\n- `presence_count`\n\n**Lifecycle Overview**:\n1. **Sensing**: Dual-state radar monitoring (static/moving).\n2. **Counter Logic**: Tracks total occupancy in defined zones.\n3. **Power Efficiency**: Enables automated HVAC/Lighting triggers.\n4. **Telemetry**: Publishes granular presence data to ThingsBoard.",
+        "x": 160,
+        "y": 20,
+        "wires": []
     },
     {
         "id": "pd_mqtt_in_1",

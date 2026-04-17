@@ -8,6 +8,16 @@
         "env": []
     },
     {
+        "id": "sat_comment_01",
+        "type": "comment",
+        "z": "ms_tab_1",
+        "name": "Flow Description & Expansion",
+        "info": "### PiltiSmart Smart Attendance Tracker\n    \n**Industry Status**: Enterprise Smart Office.\n\n**Description**: \nAutomated employee and student check-in system with high-precision timestamping and department categorization.\n\n**Telemetry Metrics**:\n- `employee_id`\n- `department`\n- `status`\n- `status_numeric`\n\n**Lifecycle Overview**:\n1. **Identity Verification**: Processes unique user identifiers.\n2. **Categorization**: Maps scans to departments (e.g., Engineering).\n3. **Behavioral Analytics**: Calculates confidence scores for check-ins.\n4. **Live Sync**: Updates attendance logs in real-time.",
+        "x": 160,
+        "y": 20,
+        "wires": []
+    },
+    {
         "id": "ms_mqtt_in_1",
         "type": "mqtt in",
         "z": "ms_tab_1",

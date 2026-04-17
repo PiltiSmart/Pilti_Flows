@@ -4,9 +4,7 @@
         "username": "sudharsan@piltigroup.com",
         "password": "123456",
         "broker": "http://192.168.1.152",
-        "device_name": "Air-Quality-Monitor",
-        "new_profile": "no",
-        "profile_name": "PiltiSmart-AQI-Probe"
+        "new_profile": "no"
     },
     "nodered": {
         "url": "https://test-piltiflows.piltismart.com",

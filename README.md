@@ -167,9 +167,10 @@ graph LR
 A specialized edge flow providing real-time employee identification and status tracking for enterprise workplace management.
 
 **Telemetry Metrics**:
-- `employee_id`: Unique identifier of the scanned employee.
+- `employee_id`: Unique identifier of the scanned employee (e.g., EMP-1234).
+- `department`: Allocated department (e.g., Engineering).
 - `status`: Attendance state ("Present", "Late", "Absent", "Half-Day").
-- `confidence_score_percent`: System reliability metric for the biometric or RFID scan.
+- `status_numeric`: Binary occupancy status (1 for present, 0 for absent).
 - `scan_timestamp`: ISO 8601 formatted event time.
 
 ```mermaid
@@ -214,9 +215,9 @@ graph LR
 Simulates life-critical health data for patient monitoring or healthcare infrastructure demonstration.
 
 **Telemetry Metrics**:
-- `bpm_numeric`: Beats per minute.
-- `blood_pressure_systolic`/`diastolic`: Arterial pressure readings (mmHg).
-- `oxygen_saturation_percent_numeric`: Pulse oximetry saturation (SpO2).
+- `heart_rate`: Beats per minute (BPM).
+- `spo2`: Blood oxygen saturation percentage.
+- `batteryLevel`: On-board battery charge state.
 
 ```mermaid
 graph TD
@@ -239,7 +240,36 @@ graph LR
     Process --> Pub["(MQTT Out) Security Telemetry"]
 ```
 
-### 7. 🖥️ Infrastructure & Server Monitoring (ML, N8N, Ad Generator, Web Scraper)
+### 7. 🖱️ PD (Presence Detector)
+**Industry Status**: Smart Office / Building Automation.
+Non-intrusive occupancy detection system using mmWave radar to distinguish between static and moving presence.
+
+**Telemetry Metrics**:
+- `is_present`: Boolean occupancy state.
+- `static_state`: Detection of unmoving human presence.
+- `moving_state`: Detection of human movement.
+- `presence_count`: Real-time entry/exit tracking.
+
+### 8. 💡 MSL (Motion Sensor Lights)
+**Industry Status**: Smart Home / Interior Design.
+Intelligent lighting system that combines motion sensitivity with ambient light thresholds (Lux).
+
+**Telemetry Metrics**:
+- `lux`: Ambient light level.
+- `light_status`: Relay output state (ON/OFF).
+- `motion`: PIR/Microwave trigger status.
+
+### 9. 🔌 SP (Smart Plug)
+**Industry Status**: Smart Home / Energy Management.
+Smart socket control and real-time energy monitoring system for domestic and small-office appliances.
+
+**Telemetry Metrics**:
+- `power`: Real-time load (Watts).
+- `current`: Amperage (Amps).
+- `voltage`: Line voltage (Volts).
+- `energy`: Aggregated consumption (kWh).
+
+### 10. 🖥️ Infrastructure & Server Monitoring
 **Industry Status**: Site Reliability Engineering (SRE) and ITOps.
 A specialized cluster of flows providing deep-level server health and performance monitoring for high-availability workloads.
 
